@@ -2,10 +2,11 @@ require 'pusher-platform'
 require 'json'
 require_relative './permissions'
 
-class Error < RuntimeError
-end
-
 module Chatkit
+
+  class Error < RuntimeError
+  end
+
   class Client
     attr_accessor :api_instance, :authorizer_instance
 
@@ -128,8 +129,8 @@ module Chatkit
 
     def create_role(name, scope, permissions)
       permissions.each do |permission|
-        unless VALID_PERMISSIONS[:room].include?(permission)
-          raise Error("Permission value #{permission} is invalid")
+        unless VALID_PERMISSIONS[scope.to_sym].include?(permission)
+          raise Chatkit::Error.new("Permission value #{permission} is invalid")
         end
       end
 
