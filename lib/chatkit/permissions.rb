@@ -2,8 +2,7 @@ module Chatkit
   ROOM_SCOPE = "room"
   GLOBAL_SCOPE = "global"
 
-  JOIN_PUBLIC_ROOM = "join_public_room"
-  JOIN_PRIVATE_ROOM = "join_private_room"
+  JOIN_ROOM = "join_room"
   LEAVE_ROOM = "leave_room"
   ADD_ROOM_MEMBER = "add_room_member"
   REMOVE_ROOM_MEMBER = "remove_room_member"
@@ -18,7 +17,6 @@ module Chatkit
   GET_USER = "get_user"
   GET_ROOM = "get_room"
   GET_USER_ROOMS = "get_user_rooms"
-  JOIN_ROOM = "join_room"
 
   VALID_PERMISSIONS = {
     room: [
@@ -34,8 +32,7 @@ module Chatkit
       GET_ROOM_MESSAGES,
     ],
     global: [
-      JOIN_PUBLIC_ROOM,
-      JOIN_PRIVATE_ROOM,
+      JOIN_ROOM,
       LEAVE_ROOM,
       ADD_ROOM_MEMBER,
       REMOVE_ROOM_MEMBER,

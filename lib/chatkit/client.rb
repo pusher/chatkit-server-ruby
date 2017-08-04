@@ -2,6 +2,9 @@ require 'pusher-platform'
 require 'json'
 require_relative './permissions'
 
+class Error < RuntimeError
+end
+
 module Chatkit
   class Client
     attr_accessor :api_instance, :authorizer_instance
