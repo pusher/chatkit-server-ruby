@@ -280,9 +280,5 @@ module Chatkit
 
       JSON.parse(resp.body)
     end
-
-    def get_from_id_query_params(from_id)
-      (from_id == nil || from_id == "") ? {} : { from_id: from_id }
-    end
   end
 end
