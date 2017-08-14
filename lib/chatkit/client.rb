@@ -38,20 +38,34 @@ module Chatkit
       @api_instance.authenticate(request, options)
     end
 
+    def generate_access_token(options)
+      @api_instance.generate_access_token(options)
+    end
+
     # User API
 
-    def create_user(id, name)
+    def create_user(id, name, avatar_url, custom_data)
+      body = {
+        id: id,
+        name: name
+      }
+
+      unless avatar_url.nil?
+        body[:avatar_url] = avatar_url
+      end
+
+      unless custom_data.nil?
+        body[:custom_data] = custom_data
+      end
+
       @api_instance.request(
         method: "POST",
         path: "/users",
         headers: {
           "Content-Type": "application/json",
         },
-        body: {
-          id: id,
-          name: name,
-        },
-        jwt: @api_instance.generate_access_token(user_id: id, su: true)
+        body: body,
+        jwt: generate_access_token(user_id: id, su: true)
       )
     end
 
@@ -59,8 +73,72 @@ module Chatkit
       @api_instance.request(
         method: "DELETE",
         path: "/users/#{id}",
-        jwt: @api_instance.generate_access_token(user_id: id, su: true)
+        jwt: generate_access_token(user_id: id, su: true)
       )
+    end
+
+    def get_users(from_id)
+      request_options = {
+        method: "GET",
+        path: "/users",
+        jwt: generate_access_token(su: true)
+      }
+
+      unless from_id == nil && from_id == ""
+        request_options.merge!({ query: { from_id: from_id }})
+      end
+
+      @api_instance.request(request_options)
+    end
+
+    def get_users_by_ids(user_ids)
+      @api_instance.request(
+        method: "GET",
+        path: "/users_by_ids",
+        query: {
+          user_ids: user_ids.join(",")
+          },
+        jwt: generate_access_token(su: true)
+      )
+    end
+
+    # Room API
+
+    def get_room(room_id)
+      @api_instance.request(
+        method: "GET",
+        path: "/rooms/#{room_id}",
+        jwt: generate_access_token(su: true)
+      )
+    end
+
+    def get_room_messages(room_id, initial_id, direction, limit)
+      query_params = {}
+
+      query_params[:initial_id] = initial_id unless initial_id.nil?
+      query_params[:direction] = direction unless direction.nil?
+      query_params[:limit] = limit unless limit.nil?
+
+      @api_instance.request(
+        method: "GET",
+        path: "/rooms/#{room_id}/messages",
+        query: query_params,
+        jwt: @api_instance.generate_access_token(su: true)
+      )
+    end
+
+    def get_rooms(from_id)
+      request_options = {
+        method: "GET",
+        path: "/rooms",
+        jwt: @api_instance.generate_access_token(su: true)
+      }
+
+      unless from_id == nil && from_id == ""
+        request_options.merge!({ query: { from_id: from_id }})
+      end
+
+      @api_instance.request(request_options)
     end
 
     # Authorizer API
@@ -93,7 +171,7 @@ module Chatkit
       resp = @authorizer_instance.request(
         method: "GET",
         path: "/roles",
-        jwt: @api_instance.generate_access_token(su: true)
+        jwt: generate_access_token(su: true)
       )
 
       JSON.parse(resp.body)
@@ -103,7 +181,7 @@ module Chatkit
       resp = @authorizer_instance.request(
         method: "GET",
         path: "/users/#{user_id}/roles",
-        jwt: @api_instance.generate_access_token(su: true)
+        jwt: generate_access_token(su: true)
       )
 
       JSON.parse(resp.body)
@@ -145,7 +223,7 @@ module Chatkit
           name: name,
           permissions: permissions,
         },
-        jwt: @api_instance.generate_access_token(su: true)
+        jwt: generate_access_token(su: true)
       )
     end
 
@@ -153,7 +231,7 @@ module Chatkit
       @authorizer_instance.request(
         method: "DELETE",
         path: "/roles/#{role_name}/scope/#{scope}",
-        jwt: @api_instance.generate_access_token(su: true)
+        jwt: generate_access_token(su: true)
       )
     end
 
@@ -171,7 +249,7 @@ module Chatkit
           "Content-Type": "application/json",
         },
         body: body,
-        jwt: @api_instance.generate_access_token(su: true)
+        jwt: generate_access_token(su: true)
       )
     end
 
@@ -183,7 +261,7 @@ module Chatkit
           "Content-Type": "application/json",
         },
         body: {},
-        jwt: @api_instance.generate_access_token(su: true)
+        jwt: generate_access_token(su: true)
       }
 
       unless room_id.nil?
@@ -197,7 +275,7 @@ module Chatkit
       resp = @authorizer_instance.request(
         method: "GET",
         path: "/roles/#{role_name}/scope/#{scope}/permissions",
-        jwt: @api_instance.generate_access_token(su: true)
+        jwt: generate_access_token(su: true)
       )
 
       JSON.parse(resp.body)
