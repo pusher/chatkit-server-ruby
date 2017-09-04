@@ -2,21 +2,21 @@ module Chatkit
   ROOM_SCOPE = "room"
   GLOBAL_SCOPE = "global"
 
-  JOIN_ROOM = "join_room"
-  LEAVE_ROOM = "leave_room"
-  ADD_ROOM_MEMBER = "add_room_member"
-  REMOVE_ROOM_MEMBER = "remove_room_member"
-  CREATE_ROOM = "create_room"
-  DELETE_ROOM = "delete_room"
-  UPDATE_ROOM = "update_room"
-  ADD_MESSAGE = "add_message"
-  CREATE_TYPING_EVENT = "create_typing_event"
-  SUBSCRIBE_PRESENCE = "subscribe_presence"
-  UPDATE_USER = "update_user"
-  GET_ROOM_MESSAGES = "get_room_messages"
-  GET_USER = "get_user"
-  GET_ROOM = "get_room"
-  GET_USER_ROOMS = "get_user_rooms"
+  JOIN_ROOM = "room:join"
+  LEAVE_ROOM = "room:leave"
+  ADD_ROOM_MEMBER = "room:members:add"
+  REMOVE_ROOM_MEMBER = "room:members:remove"
+  CREATE_ROOM = "room:create"
+  DELETE_ROOM = "room:delete"
+  UPDATE_ROOM = "room:update"
+  CREATE_MESSAGE = "message:create"
+  CREATE_TYPING_EVENT = "room:typing_indicator:create"
+  SUBSCRIBE_PRESENCE = "presence:subscribe"
+  UPDATE_USER = "user:update"
+  GET_ROOM_MESSAGES = "room:messages:get"
+  GET_USER = "user:get"
+  GET_ROOM = "room:get"
+  GET_USER_ROOMS = "user:rooms:get"
 
   VALID_PERMISSIONS = {
     room: [
@@ -26,7 +26,7 @@ module Chatkit
       REMOVE_ROOM_MEMBER,
       DELETE_ROOM,
       UPDATE_ROOM,
-      ADD_MESSAGE,
+      CREATE_MESSAGE,
       CREATE_TYPING_EVENT,
       GET_ROOM_MESSAGES,
     ],
@@ -38,7 +38,7 @@ module Chatkit
       CREATE_ROOM,
       DELETE_ROOM,
       UPDATE_ROOM,
-      ADD_MESSAGE,
+      CREATE_MESSAGE,
       CREATE_TYPING_EVENT,
       SUBSCRIBE_PRESENCE,
       UPDATE_USER,
