@@ -167,6 +167,14 @@ module Chatkit
       assign_role_to_user(user_id, role_name, room_id)
     end
 
+    def reassign_global_role_to_user(user_id, role_name)
+      reassign_role_for_user(user_id, role_name, nil)
+    end
+
+    def reassign_room_role_to_user(user_id, role_name, room_id)
+      reassign_role_for_user(user_id, role_name, room_id)
+    end
+
     def get_roles
       resp = @authorizer_instance.request(
         method: "GET",
@@ -253,14 +261,32 @@ module Chatkit
       )
     end
 
-    def remove_role_for_user(user_id, room_id)
-      options = {
+    def reassign_role_for_user(user_id, role_name, room_id)
+      body = { name: role_name }
+
+      unless room_id.nil?
+        body[:room_id] = room_id
+      end
+
+      @authorizer_instance.request(
         method: "PUT",
         path: "/users/#{user_id}/roles",
         headers: {
           "Content-Type": "application/json",
         },
-        body: {},
+        body: body,
+        jwt: generate_access_token(su: true)
+      )
+    end
+
+    def remove_role_for_user(user_id, room_id)
+      options = {
+        method: "DELETE",
+        path: "/users/#{user_id}/roles",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        query: { room_id: room_id },
         jwt: generate_access_token(su: true)
       }
 
