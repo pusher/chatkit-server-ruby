@@ -12,7 +12,7 @@ module Chatkit
 
     def initialize(options)
       base_options = {
-        instance: options[:instance],
+        locator: options[:instance_locator],
         key: options[:key],
         port: options[:port],
         host: options[:host],

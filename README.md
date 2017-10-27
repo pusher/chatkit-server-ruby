@@ -14,4 +14,4 @@ Refer to the `examples` directory. It contains several examples demonstrating al
 
 ## Documentation
 
-Refer to Mimir. It documents how to use all methods with examples.
+Refer to the [docs site](https://docs.pusher.com/chatkit/reference/server-ruby). It documents how to use all methods with examples.
