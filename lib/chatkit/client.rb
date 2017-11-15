@@ -65,7 +65,7 @@ module Chatkit
           "Content-Type": "application/json",
         },
         body: body,
-        jwt: generate_access_token(user_id: id, su: true)
+        jwt: generate_access_token(su: true)
       )
     end
 
@@ -73,7 +73,7 @@ module Chatkit
       @api_instance.request(
         method: "DELETE",
         path: "/users/#{id}",
-        jwt: generate_access_token(user_id: id, su: true)
+        jwt: generate_access_token(su: true)
       )
     end
 
