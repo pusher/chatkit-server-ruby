@@ -216,7 +216,7 @@ module Chatkit
 
       @authorizer_instance.request(
         method: "PUT",
-        path: "/roles/#{role_name}/scope/#{scope}/permissions"
+        path: "/roles/#{role_name}/scope/#{scope}/permissions",
         headers: {
           "Content-Type": "application/json"
         },
