@@ -17,6 +17,8 @@ module Chatkit
   GET_USER = "user:get"
   GET_ROOM = "room:get"
   GET_USER_ROOMS = "user:rooms:get"
+  CREATE_FILE = "file:create"
+  GET_FILE = "file:get"
 
   VALID_PERMISSIONS = {
     room: [
@@ -29,6 +31,8 @@ module Chatkit
       CREATE_MESSAGE,
       CREATE_TYPING_EVENT,
       GET_ROOM_MESSAGES,
+      CREATE_FILE,
+      GET_FILE
     ],
     global: [
       JOIN_ROOM,
@@ -46,6 +50,8 @@ module Chatkit
       GET_USER,
       GET_ROOM,
       GET_USER_ROOMS,
+      CREATE_FILE,
+      GET_FILE
     ]
   }
 end
