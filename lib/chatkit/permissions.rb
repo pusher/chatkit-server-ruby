@@ -19,6 +19,8 @@ module Chatkit
   GET_USER_ROOMS = "user:rooms:get"
   CREATE_FILE = "file:create"
   GET_FILE = "file:get"
+  CURSOR_READ_GET = "cursors:read:get"
+  CURSOR_READ_SET = "cursors:read:set"
 
   VALID_PERMISSIONS = {
     room: [
@@ -32,7 +34,9 @@ module Chatkit
       CREATE_TYPING_EVENT,
       GET_ROOM_MESSAGES,
       CREATE_FILE,
-      GET_FILE
+      GET_FILE,
+      CURSOR_READ_GET,
+      CURSOR_READ_SET
     ],
     global: [
       JOIN_ROOM,
@@ -51,7 +55,9 @@ module Chatkit
       GET_ROOM,
       GET_USER_ROOMS,
       CREATE_FILE,
-      GET_FILE
+      GET_FILE,
+      CURSOR_READ_GET,
+      CURSOR_READ_SET
     ]
   }
 end

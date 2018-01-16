@@ -207,8 +207,8 @@ module Chatkit
       get_permissions_for_role(role_name, ROOM_SCOPE)
     end
 
-    def update_role_permissions(role_name, scope, permissions_to_add, permissions_to_remove)
-      check_permissions(permissions_to_add+permissions_to_remove)
+    def update_role_permissions(role_name, scope, permissions_to_add = [], permissions_to_remove = [])
+      check_permissions(permissions_to_add+permissions_to_remove, scope)
 
       if permissions_to_add.empty? && permissions_to_remove.empty?
         raise Chatkit::Error.new("permissions_to_add and permissions_to_remove cannot both be empty")
@@ -232,7 +232,7 @@ module Chatkit
     private
 
     def create_role(name, scope, permissions)
-      check_permissions(permissions)
+      check_permissions(permissions, scope)
 
       @authorizer_instance.request(
         method: "POST",
@@ -303,7 +303,7 @@ module Chatkit
       JSON.parse(resp.body)
     end
 
-    def check_permissions(permissions)
+    def check_permissions(permissions, scope)
       permissions.each do |permission|
         unless VALID_PERMISSIONS[scope.to_sym].include?(permission)
           raise Chatkit::Error.new("Permission value #{permission} is invalid")
