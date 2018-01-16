@@ -7,5 +7,5 @@ chatkit = Chatkit::Client.new({
 
 p chatkit.create_global_role(
 	"mcflurry",
-	[Chatkit::CREATE_MESSAGE, Chatkit::LEAVE_ROOM, Chatkit::ADD_ROOM_MEMBER]
+	["cursors:read:set", "cursors:read:get"]
 )

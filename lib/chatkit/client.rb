@@ -1,8 +1,9 @@
 require 'pusher-platform'
 require 'json'
-require_relative './permissions'
 
 module Chatkit
+  ROOM_SCOPE = "room"
+  GLOBAL_SCOPE = "global"
 
   class Error < RuntimeError
   end
@@ -208,8 +209,6 @@ module Chatkit
     end
 
     def update_role_permissions(role_name, scope, permissions_to_add = [], permissions_to_remove = [])
-      check_permissions(permissions_to_add+permissions_to_remove, scope)
-
       if permissions_to_add.empty? && permissions_to_remove.empty?
         raise Chatkit::Error.new("permissions_to_add and permissions_to_remove cannot both be empty")
       end
@@ -232,8 +231,6 @@ module Chatkit
     private
 
     def create_role(name, scope, permissions)
-      check_permissions(permissions, scope)
-
       @authorizer_instance.request(
         method: "POST",
         path: "/roles",
@@ -301,14 +298,6 @@ module Chatkit
       )
 
       JSON.parse(resp.body)
-    end
-
-    def check_permissions(permissions, scope)
-      permissions.each do |permission|
-        unless VALID_PERMISSIONS[scope.to_sym].include?(permission)
-          raise Chatkit::Error.new("Permission value #{permission} is invalid")
-        end
-      end
     end
   end
 end
