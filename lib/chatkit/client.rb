@@ -35,8 +35,16 @@ module Chatkit
       )
     end
 
-    def authenticate(request, options)
-      @api_instance.authenticate(request, options)
+    def authenticate(options)
+      user_id = options['user_id'] || options[:user_id]
+      auth_payload = options['auth_payload'] || options[:auth_payload] || {
+        grant_type: 'client_credentials'
+      }
+      @api_instance.authenticate(auth_payload, { user_id: user_id })
+    end
+
+    def authenticate_with_request(request, options)
+      @api_instance.authenticate_with_request(request, options)
     end
 
     def generate_access_token(options)
