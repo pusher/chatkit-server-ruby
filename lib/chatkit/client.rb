@@ -20,14 +20,14 @@ module Chatkit
         client: options[:client]
       }
 
-      @api_instance = Pusher::Instance.new(
+      @api_instance = PusherPlatform::Instance.new(
         base_options.merge!({
           service_name: 'chatkit',
           service_version: 'v1'
         })
       )
 
-      @authorizer_instance = Pusher::Instance.new(
+      @authorizer_instance = PusherPlatform::Instance.new(
         base_options.merge!({
           service_name: 'chatkit_authorizer',
           service_version: 'v1'
