@@ -67,5 +67,3 @@ auth_data = chatkit.authenticate_with_request(request, { user_id: 'testymctest' 
 ### Changes
 
 - Bump pusher-platform-ruby dependency to 0.6.0
-
-_.. prehistory_
