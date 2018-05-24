@@ -2,18 +2,16 @@ PATH
   remote: .
   specs:
     pusher-chatkit-server (0.7.0)
-      pusher-platform (~> 0.8.0)
+      pusher-platform (~> 0.8.1)
 
 GEM
   remote: https://rubygems.org/
   specs:
     excon (0.54.0)
     jwt (1.5.6)
-    pusher-platform (0.8.0)
+    pusher-platform (0.8.1)
       excon (~> 0.54.0)
       jwt (~> 1.5, >= 1.5.6)
-      rack (>= 1.0)
-    rack (2.0.4)
 
 PLATFORMS
   ruby
@@ -22,4 +20,4 @@ DEPENDENCIES
   pusher-chatkit-server!
 
 BUNDLED WITH
-   1.16.1
+   1.16.2
