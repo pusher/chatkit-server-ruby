@@ -1,6 +1,6 @@
 Gem::Specification.new do |s|
   s.name        = 'pusher-chatkit-server'
-  s.version     = '0.7.0'
+  s.version     = '0.7.1'
   s.licenses    = ['MIT']
   s.summary     = 'Pusher Chatkit Ruby SDK'
   s.authors     = ['Pusher']
