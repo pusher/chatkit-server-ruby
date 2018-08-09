@@ -109,7 +109,7 @@ module Chatkit
         method: "GET",
         path: "/users_by_ids",
         query: {
-          user_ids: user_ids.join(",")
+          id: user_ids,
           },
         jwt: generate_su_token
       )
