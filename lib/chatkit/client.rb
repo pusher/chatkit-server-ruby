@@ -154,6 +154,31 @@ module Chatkit
       @api_instance.request(request_options)
     end
 
+    def create_room(name, privacy, user_ids)
+      body = { }
+
+      unless name.nil?
+        body[:name] = name
+      end
+
+      unless privacy.nil?
+        body[:private] = privacy
+      end
+
+      unless user_ids.nil?
+        body[:user_ids] = user_ids
+      end
+
+      @api_instance.request(
+        method: "POST",
+        path: "/rooms",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: body,
+        jwt: generate_su_token
+      )
+    end
     # Authorizer API
 
     def create_room_role(name, permissions)
