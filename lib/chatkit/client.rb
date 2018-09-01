@@ -154,15 +154,15 @@ module Chatkit
       @api_instance.request(request_options)
     end
 
-    def create_room(name, privacy, user_ids)
+    def create_room(user_id, name = nil, private_room = nil, user_ids = nil)
       body = { }
 
       unless name.nil?
         body[:name] = name
       end
 
-      unless privacy.nil?
-        body[:private] = privacy
+      unless private_room.nil?
+        body[:private] = private_room
       end
 
       unless user_ids.nil?
@@ -176,7 +176,7 @@ module Chatkit
           "Content-Type": "application/json",
         },
         body: body,
-        jwt: generate_su_token
+        jwt: generate_su_token({ user_id: user_id })
       )
     end
     # Authorizer API
