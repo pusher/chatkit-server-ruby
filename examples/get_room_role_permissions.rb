@@ -5,4 +5,6 @@ chatkit = Chatkit::Client.new({
   key: "the-id-bit:the-secret-bit"
 })
 
-p chatkit.get_permissions_for_room_role("adminzz")
+p chatkit.get_permissions_for_room_role({
+  name: "admin"
+})

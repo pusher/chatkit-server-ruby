@@ -5,7 +5,7 @@ chatkit = Chatkit::Client.new({
   key: "the-id-bit:the-secret-bit"
 })
 
-p chatkit.create_global_role(
-  "adminzz",
-  ["cursors:read:set", "cursors:read:get"]
-)
+p chatkit.create_room_role({
+  name: "admin",
+  permissions: ["cursors:read:set", "cursors:read:get"]
+})

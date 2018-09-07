@@ -6,6 +6,39 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased](https://github.com/pusher/chatkit-server-ruby/compare/0.7.2...HEAD)
 
+### Changes
+
+- *Breaking:* All functions now take a single hash as their sole parameter. The single exception to this is `authenticate_with_request`, which still takes two parameters, `def authenticate_with_request(request, options)`
+
+### Additions
+
+- Added the following functionality:
+    - `create_room`
+    - `update_room`
+    - `delete_room`
+    - `get_user_rooms`
+    - `get_user_joinable_rooms`
+    - `add_users_to_room`
+    - `remove_users_from_room`
+    - `get_user`
+    - `update_user`
+    - `create_users`
+    - `send_message`
+    - `update_permissions_for_global_role`
+    - `update_permissions_for_room_role`
+    - `get_read_cursor`
+    - `set_read_cursor`
+    - `get_user_read_cursors`
+    - `get_read_cursors_for_room`
+
+### Removals
+
+- Removed `update_permissions_for_role` (replaced by `update_permissions_for_global_role` and `update_permissions_for_room_role`)
+
+### Fixes
+
+- `get_rooms` now properly paginates using the `from_ts` value provided
+
 ## [0.7.2](https://github.com/pusher/chatkit-server-ruby/compare/0.7.1...0.7.2) - 2018-07-20
 
 ### Changes

@@ -5,6 +5,8 @@ chatkit = Chatkit::Client.new({
   key: "the-id-bit:the-secret-bit"
 })
 
-p chatkit.get_permissions_for_global_role({
-  name: "admin"
-})
+# p chatkit.get_users({
+#   from_ts: '2018-08-14T15:42:19Z',
+#   limit: 2
+# })
+p chatkit.get_users()
