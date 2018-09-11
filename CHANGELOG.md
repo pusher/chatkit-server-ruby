@@ -8,7 +8,20 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### Changes
 
-- *Breaking:* All functions now take a single hash as their sole parameter. The single exception to this is `authenticate_with_request`, which still takes two parameters, `def authenticate_with_request(request, options)`
+- *Breaking:* All functions now take a single hash as their sole parameter
+- *Breaking*: All functions that interact with the API (i.e. everything but authentication methods) either raise a `PusherPlatform::ErrorResponse` or return a hash of the form:
+
+```ruby
+{
+  status: 200
+  headers: {
+    ...
+  },
+  body: {
+    ...
+  }
+}
+```
 
 ### Additions
 
@@ -31,9 +44,12 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
     - `get_user_read_cursors`
     - `get_read_cursors_for_room`
 
+- `get_rooms` supports the `include_private` option
+
 ### Removals
 
 - Removed `update_permissions_for_role` (replaced by `update_permissions_for_global_role` and `update_permissions_for_room_role`)
+- `authenticate_with_request` has been removed as we believe `authenticate` provides an easier to use API
 
 ### Fixes
 

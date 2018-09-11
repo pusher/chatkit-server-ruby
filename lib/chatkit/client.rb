@@ -21,21 +21,21 @@ module Chatkit
       }
 
       @api_instance = PusherPlatform::Instance.new(
-        base_options.merge!({
+        base_options.merge({
           service_name: 'chatkit',
           service_version: 'v1'
         })
       )
 
       @authorizer_instance = PusherPlatform::Instance.new(
-        base_options.merge!({
+        base_options.merge({
           service_name: 'chatkit_authorizer',
           service_version: 'v1'
         })
       )
 
       @cursors_instance = PusherPlatform::Instance.new(
-        base_options.merge!({
+        base_options.merge({
           service_name: 'chatkit_cursors',
           service_version: 'v1'
         })
@@ -48,10 +48,6 @@ module Chatkit
         grant_type: 'client_credentials'
       }
       @api_instance.authenticate(auth_payload, { user_id: user_id })
-    end
-
-    def authenticate_with_request(request, options)
-      @api_instance.authenticate_with_request(request, options)
     end
 
     def generate_access_token(options)
@@ -78,31 +74,25 @@ module Chatkit
         body[:custom_data] = options[:custom_data]
       end
 
-      res = @api_instance.request(
+      api_request({
         method: "POST",
         path: "/users",
-        headers: {
-          "Content-Type": "application/json",
-        },
         body: body,
         jwt: generate_su_token
-      )
-
-      JSON.parse(res.body)
+      })
     end
 
     def create_users(options)
-      res = @api_instance.request(
+      if options[:users].nil?
+        raise Chatkit::Error.new("You must provide a list of users that you want to create")
+      end
+
+      api_request({
         method: "POST",
         path: "/batch_users",
-        headers: {
-          "Content-Type": "application/json",
-        },
         body: options,
         jwt: generate_su_token
-      )
-
-      JSON.parse(res.body)
+      })
     end
 
     def update_user(options)
@@ -115,15 +105,12 @@ module Chatkit
       payload[:avatar_url] = options[:avatar_url] unless options[:avatar_url].nil?
       payload[:custom_data] = options[:custom_data] unless options[:custom_data].nil?
 
-      @api_instance.request(
+      api_request({
         method: "PUT",
         path: "/users/#{options[:id]}",
-        headers: {
-          "Content-Type": "application/json",
-        },
         body: payload,
         jwt: generate_su_token({ user_id: options[:id] })
-      )
+      })
     end
 
     def delete_user(options)
@@ -131,11 +118,11 @@ module Chatkit
         raise Chatkit::Error.new("You must provide the ID of the user you want to delete")
       end
 
-      @api_instance.request(
+      api_request({
         method: "DELETE",
         path: "/users/#{options[:id]}",
         jwt: generate_su_token
-      )
+      })
     end
 
     def get_user(options)
@@ -143,13 +130,11 @@ module Chatkit
         raise Chatkit::Error.new("You must provide the ID of the user you want to fetch")
       end
 
-      res = @api_instance.request(
+      api_request({
         method: "GET",
         path: "/users/#{options[:id]}",
         jwt: generate_su_token
-      )
-
-      JSON.parse(res.body)
+      })
     end
 
     def get_users(options = nil)
@@ -168,7 +153,7 @@ module Chatkit
         })
       end
 
-      @api_instance.request(request_options)
+      api_request(request_options)
     end
 
     def get_users_by_ids(options)
@@ -176,14 +161,14 @@ module Chatkit
         raise Chatkit::Error.new("You must provide the IDs of the users you want to fetch")
       end
 
-      @api_instance.request(
+      api_request({
         method: "GET",
         path: "/users_by_ids",
         query: {
           user_ids: options[:user_ids].join(",")
         },
         jwt: generate_su_token
-      )
+      })
     end
 
     # Room API
@@ -206,17 +191,12 @@ module Chatkit
         body[:user_ids] = options[:user_ids]
       end
 
-      res = @api_instance.request(
+      api_request({
         method: "POST",
         path: "/rooms",
-        headers: {
-          "Content-Type": "application/json",
-        },
         body: body,
         jwt: generate_su_token({ user_id: options[:creator_id] })
-      )
-
-      JSON.parse(res.body)
+      })
     end
 
     def update_room(options)
@@ -228,15 +208,12 @@ module Chatkit
       payload[:name] = options[:name] unless options[:name].nil?
       payload[:private] = options[:private] unless options[:private].nil?
 
-      @api_instance.request(
+      api_request({
         method: "PUT",
         path: "/rooms/#{options[:id]}",
-        headers: {
-          "Content-Type": "application/json",
-        },
         body: payload,
         jwt: generate_su_token
-      )
+      })
     end
 
     def delete_room(options)
@@ -244,14 +221,11 @@ module Chatkit
         raise Chatkit::Error.new("You must provide the ID of the room to delete")
       end
 
-      @api_instance.request(
+      api_request({
         method: "DELETE",
         path: "/rooms/#{options[:id]}",
-        headers: {
-          "Content-Type": "application/json",
-        },
         jwt: generate_su_token
-      )
+      })
     end
 
     def get_room(options)
@@ -259,11 +233,11 @@ module Chatkit
         raise Chatkit::Error.new("You must provide the ID of the room to fetch")
       end
 
-      @api_instance.request(
+      api_request({
         method: "GET",
         path: "/rooms/#{options[:id]}",
         jwt: generate_su_token
-      )
+      })
     end
 
     def get_rooms(options = nil)
@@ -273,24 +247,27 @@ module Chatkit
         jwt: generate_su_token
       }
 
+      include_private = !options.nil? && !options[:include_private].nil? ? options[:include_private] : false
+
       unless options.nil?
-        request_options.merge!({ query: { from_id: options[:from_id] }})
+        request_options.merge!({
+          query: {
+            from_id: options[:from_id],
+            include_private: include_private
+          }
+        })
       end
 
-      res = @api_instance.request(request_options)
-
-      JSON.parse(res.body)
+      api_request(request_options)
     end
 
     def get_user_rooms(options)
-      res = get_rooms_for_user(options)
-      JSON.parse(res.body)
+      get_rooms_for_user(options)
     end
 
     def get_user_joinable_rooms(options)
       options[:joinable] = true
-      res = get_rooms_for_user(options)
-      JSON.parse(res.body)
+      get_rooms_for_user(options)
     end
 
     def add_users_to_room(options)
@@ -302,15 +279,12 @@ module Chatkit
         raise Chatkit::Error.new("You must provide a list of IDs of the users you want to add to the room")
       end
 
-      @api_instance.request(
+      api_request({
         method: "PUT",
         path: "/rooms/#{options[:room_id]}/users/add",
-        headers: {
-          "Content-Type": "application/json",
-        },
         body: { user_ids: options[:user_ids] },
         jwt: generate_su_token
-      )
+      })
     end
 
     def remove_users_from_room(options)
@@ -322,15 +296,12 @@ module Chatkit
         raise Chatkit::Error.new("You must provide a list of IDs of the users you want to remove from the room")
       end
 
-      @api_instance.request(
+      api_request({
         method: "PUT",
         path: "/rooms/#{options[:room_id]}/users/remove",
-        headers: {
-          "Content-Type": "application/json",
-        },
         body: { user_ids: options[:user_ids] },
         jwt: generate_su_token
-      )
+      })
     end
 
     # Messages API
@@ -345,12 +316,12 @@ module Chatkit
       query_params[:direction] = options[:direction] unless options[:direction].nil?
       query_params[:limit] = options[:limit] unless options[:limit].nil?
 
-      @api_instance.request(
+      api_request({
         method: "GET",
         path: "/rooms/#{options[:room_id]}/messages",
         query: query_params,
         jwt: generate_su_token
-      )
+      })
     end
 
     def send_message(options)
@@ -387,12 +358,12 @@ module Chatkit
         attachment: options[:attachment]
       }
 
-      @api_instance.request(
+      api_request({
         method: "POST",
         path: "/rooms/#{options[:room_id]}/messages",
         body: payload,
         jwt: generate_su_token({ user_id: options[:sender_id] })
-      )
+      })
     end
 
     # Roles and permissions API
@@ -430,13 +401,11 @@ module Chatkit
     end
 
     def get_roles
-      res = @authorizer_instance.request(
+      authorizer_request({
         method: "GET",
         path: "/roles",
         jwt: generate_su_token
-      )
-
-      JSON.parse(res.body)
+      })
     end
 
     def get_user_roles(options)
@@ -444,13 +413,11 @@ module Chatkit
         raise Chatkit::Error.new("You must provide the ID of the user whose rooms you want to fetch")
       end
 
-      res = @authorizer_instance.request(
+      authorizer_request({
         method: "GET",
         path: "/users/#{options[:user_id]}/roles",
         jwt: generate_su_token
-      )
-
-      JSON.parse(res.body)
+      })
     end
 
     def remove_global_role_for_user(options)
@@ -496,13 +463,11 @@ module Chatkit
         raise Chatkit::Error.new("You must provide the ID of the room that you want the read cursor for")
       end
 
-      res = @cursors_instance.request(
+      cursors_request({
         method: "GET",
         path: "/cursors/0/rooms/#{options[:room_id]}/users/#{options[:user_id]}",
         jwt: generate_su_token
-      )
-
-      JSON.parse(res.body)
+      })
     end
 
     def set_read_cursor(options)
@@ -518,14 +483,12 @@ module Chatkit
         raise Chatkit::Error.new("You must provide position of the read cursor")
       end
 
-      res = @cursors_instance.request(
+      cursors_request({
         method: "PUT",
         path: "/cursors/0/rooms/#{options[:room_id]}/users/#{options[:user_id]}",
         body: { position: options[:position] },
         jwt: generate_su_token
-      )
-
-      JSON.parse(res.body)
+      })
     end
 
     def get_user_read_cursors(options)
@@ -533,11 +496,11 @@ module Chatkit
         raise Chatkit::Error.new("You must provide the ID of the user whose read cursors you want to fetch")
       end
 
-      @cursors_instance.request(
+      cursors_request({
         method: "GET",
         path: "/cursors/0/users/#{options[:user_id]}",
         jwt: generate_su_token
-      )
+      })
     end
 
     def get_read_cursors_for_room(options)
@@ -545,30 +508,43 @@ module Chatkit
         raise Chatkit::Error.new("You must provide the ID of the room that you want the read cursors for")
       end
 
-      res = @cursors_instance.request(
+      cursors_request({
         method: "GET",
         path: "/cursors/0/rooms/#{options[:room_id]}",
         jwt: generate_su_token
-      )
-
-      JSON.parse(res.body)
+      })
     end
 
     # Service-specific helpers
 
     def api_request(options)
-      @api_instance.request(options)
+      make_request(@api_instance, options)
     end
 
     def authorizer_request(options)
-      @authorizer_instance.request(options)
+      make_request(@authorizer_instance, options)
     end
 
     def cursors_request(options)
-      @cursors_instance.request(options)
+      make_request(@cursors_instance, options)
     end
 
     private
+
+    def make_request(instance, options)
+      options.merge!({ headers: { "Content-Type": "application/json" } })
+      format_response(instance.request(options))
+    end
+
+    def format_response(res)
+      body = res.body.empty? ? nil : JSON.parse(res.body)
+
+      {
+        status: res.status,
+        headers: res.headers,
+        body: body
+      }
+    end
 
     def get_rooms_for_user(options)
       if options[:id].nil?
@@ -585,7 +561,7 @@ module Chatkit
         request_options.merge!({ query: { joinable: options[:joinable] }})
       end
 
-      @api_instance.request(request_options)
+      api_request(request_options)
     end
 
     def create_role(options)
@@ -597,19 +573,16 @@ module Chatkit
         raise Chatkit::Error.new("You must provide permissions for the role, even if it's an empty list")
       end
 
-      @authorizer_instance.request(
+      authorizer_request({
         method: "POST",
         path: "/roles",
-        headers: {
-          "Content-Type": "application/json"
-        },
         body: {
           scope: options[:scope],
           name: options[:name],
           permissions: options[:permissions],
         },
         jwt: generate_su_token
-      )
+      })
     end
 
     def delete_role(options)
@@ -617,11 +590,11 @@ module Chatkit
         raise Chatkit::Error.new("You must provide the role's name")
       end
 
-      @authorizer_instance.request(
+      authorizer_request({
         method: "DELETE",
         path: "/roles/#{options[:name]}/scope/#{options[:scope]}",
         jwt: generate_su_token
-      )
+      })
     end
 
     def assign_role_to_user(options)
@@ -639,15 +612,12 @@ module Chatkit
         body.merge!(room_id: options[:room_id])
       end
 
-      @authorizer_instance.request(
+      authorizer_request({
         method: "PUT",
         path: "/users/#{options[:user_id]}/roles",
-        headers: {
-          "Content-Type": "application/json",
-        },
         body: body,
         jwt: generate_su_token
-      )
+      })
     end
 
     def remove_role_for_user(options)
@@ -658,9 +628,6 @@ module Chatkit
       request_options = {
         method: "DELETE",
         path: "/users/#{options[:user_id]}/roles",
-        headers: {
-          "Content-Type": "application/json",
-        },
         jwt: generate_su_token
       }
 
@@ -668,7 +635,7 @@ module Chatkit
         request_options.merge!({ query: { room_id: options[:room_id] }})
       end
 
-      @authorizer_instance.request(request_options)
+      authorizer_request(request_options)
     end
 
     def get_permissions_for_role(options)
@@ -676,13 +643,11 @@ module Chatkit
         raise Chatkit::Error.new("You must provide the name of the role you want to fetch the permissions of")
       end
 
-      res = @authorizer_instance.request(
+      authorizer_request({
         method: "GET",
         path: "/roles/#{options[:name]}/scope/#{options[:scope]}/permissions",
         jwt: generate_su_token
-      )
-
-      JSON.parse(res.body)
+      })
     end
 
     def update_permissions_for_role(options)
@@ -701,15 +666,12 @@ module Chatkit
       body[:add_permissions] = permissions_to_add unless permissions_to_add.empty?
       body[:remove_permissions] = permissions_to_remove unless permissions_to_remove.empty?
 
-      @authorizer_instance.request(
+      authorizer_request({
         method: "PUT",
         path: "/roles/#{options[:name]}/scope/#{options[:scope]}/permissions",
-        headers: {
-          "Content-Type": "application/json"
-        },
         body: body,
         jwt: generate_su_token
-      )
+      })
     end
   end
 end
