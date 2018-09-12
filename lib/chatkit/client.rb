@@ -554,7 +554,7 @@ module Chatkit
       request_options = {
         method: "GET",
         path: "/users/#{options[:id]}/rooms",
-        jwt: generate_su_token({ user_id: options[:id] })
+        jwt: generate_su_token
       }
 
       unless options[:joinable].nil?
