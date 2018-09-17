@@ -25,7 +25,7 @@ module Chatkit
       @api_instance = PusherPlatform::Instance.new(
         base_options.merge({
           service_name: 'chatkit',
-          service_version: 'v1'
+          service_version: 'v2'
         })
       )
 
@@ -167,7 +167,7 @@ module Chatkit
         method: "GET",
         path: "/users_by_ids",
         query: {
-          user_ids: options[:user_ids].join(",")
+          id: options[:user_ids],
         },
         jwt: generate_su_token
       })
