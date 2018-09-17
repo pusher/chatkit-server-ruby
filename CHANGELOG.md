@@ -40,6 +40,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
     - `update_user`
     - `create_users`
     - `send_message`
+    - `delete_message`
     - `update_permissions_for_global_role`
     - `update_permissions_for_room_role`
     - `get_read_cursor`
