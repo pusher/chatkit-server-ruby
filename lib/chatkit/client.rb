@@ -1,12 +1,14 @@
 require 'pusher-platform'
 require 'json'
 
+require_relative './error'
+require_relative './missing_parameter_error'
+require_relative './response_error'
+
 module Chatkit
+
   ROOM_SCOPE = "room"
   GLOBAL_SCOPE = "global"
-
-  class Error < RuntimeError
-  end
 
   class Client
     attr_accessor :api_instance, :authorizer_instance, :cursors_instance
@@ -84,7 +86,7 @@ module Chatkit
 
     def create_users(options)
       if options[:users].nil?
-        raise Chatkit::Error.new("You must provide a list of users that you want to create")
+        raise Chatkit::MissingParameterError.new("You must provide a list of users that you want to create")
       end
 
       api_request({
@@ -97,7 +99,7 @@ module Chatkit
 
     def update_user(options)
       if options[:id].nil?
-        raise Chatkit::Error.new("You must provide the ID of the user you want to update")
+        raise Chatkit::MissingParameterError.new("You must provide the ID of the user you want to update")
       end
 
       payload = {}
@@ -115,7 +117,7 @@ module Chatkit
 
     def delete_user(options)
       if options[:id].nil?
-        raise Chatkit::Error.new("You must provide the ID of the user you want to delete")
+        raise Chatkit::MissingParameterError.new("You must provide the ID of the user you want to delete")
       end
 
       api_request({
@@ -127,7 +129,7 @@ module Chatkit
 
     def get_user(options)
       if options[:id].nil?
-        raise Chatkit::Error.new("You must provide the ID of the user you want to fetch")
+        raise Chatkit::MissingParameterError.new("You must provide the ID of the user you want to fetch")
       end
 
       api_request({
@@ -147,7 +149,7 @@ module Chatkit
       unless options.nil?
         request_options.merge!({
           query: {
-            from_ts: options[:from_ts],
+            from_ts: options[:from_timestamp],
             limit: options[:limit],
           }
         })
@@ -158,7 +160,7 @@ module Chatkit
 
     def get_users_by_ids(options)
       if options[:user_ids].nil?
-        raise Chatkit::Error.new("You must provide the IDs of the users you want to fetch")
+        raise Chatkit::MissingParameterError.new("You must provide the IDs of the users you want to fetch")
       end
 
       api_request({
@@ -175,11 +177,11 @@ module Chatkit
 
     def create_room(options)
       if options[:creator_id].nil?
-        raise Chatkit::Error.new("You must provide the ID of the user creating the room")
+        raise Chatkit::MissingParameterError.new("You must provide the ID of the user creating the room")
       end
 
       if options[:name].nil?
-        raise Chatkit::Error.new("You must provide a name for the room")
+        raise Chatkit::MissingParameterError.new("You must provide a name for the room")
       end
 
       body = {
@@ -201,7 +203,7 @@ module Chatkit
 
     def update_room(options)
       if options[:id].nil?
-        raise Chatkit::Error.new("You must provide the ID of the room to update")
+        raise Chatkit::MissingParameterError.new("You must provide the ID of the room to update")
       end
 
       payload = {}
@@ -218,7 +220,7 @@ module Chatkit
 
     def delete_room(options)
       if options[:id].nil?
-        raise Chatkit::Error.new("You must provide the ID of the room to delete")
+        raise Chatkit::MissingParameterError.new("You must provide the ID of the room to delete")
       end
 
       api_request({
@@ -230,7 +232,7 @@ module Chatkit
 
     def get_room(options)
       if options[:id].nil?
-        raise Chatkit::Error.new("You must provide the ID of the room to fetch")
+        raise Chatkit::MissingParameterError.new("You must provide the ID of the room to fetch")
       end
 
       api_request({
@@ -272,11 +274,11 @@ module Chatkit
 
     def add_users_to_room(options)
       if options[:room_id].nil?
-        raise Chatkit::Error.new("You must provide the ID of the room you want to add users to")
+        raise Chatkit::MissingParameterError.new("You must provide the ID of the room you want to add users to")
       end
 
       if options[:user_ids].nil?
-        raise Chatkit::Error.new("You must provide a list of IDs of the users you want to add to the room")
+        raise Chatkit::MissingParameterError.new("You must provide a list of IDs of the users you want to add to the room")
       end
 
       api_request({
@@ -289,11 +291,11 @@ module Chatkit
 
     def remove_users_from_room(options)
       if options[:room_id].nil?
-        raise Chatkit::Error.new("You must provide the ID of the room you want to remove users from")
+        raise Chatkit::MissingParameterError.new("You must provide the ID of the room you want to remove users from")
       end
 
       if options[:user_ids].nil?
-        raise Chatkit::Error.new("You must provide a list of IDs of the users you want to remove from the room")
+        raise Chatkit::MissingParameterError.new("You must provide a list of IDs of the users you want to remove from the room")
       end
 
       api_request({
@@ -308,7 +310,7 @@ module Chatkit
 
     def get_room_messages(options)
       if options[:room_id].nil?
-        raise Chatkit::Error.new("You must provide the ID of the room to fetch messages from")
+        raise Chatkit::MissingParameterError.new("You must provide the ID of the room to fetch messages from")
       end
 
       query_params = {}
@@ -326,28 +328,28 @@ module Chatkit
 
     def send_message(options)
       if options[:room_id].nil?
-        raise Chatkit::Error.new("You must provide the ID of the room to send the message to")
+        raise Chatkit::MissingParameterError.new("You must provide the ID of the room to send the message to")
       end
 
       if options[:sender_id].nil?
-        raise Chatkit::Error.new("You must provide the ID of the user sending the message")
+        raise Chatkit::MissingParameterError.new("You must provide the ID of the user sending the message")
       end
 
       if options[:text].nil?
-        raise Chatkit::Error.new("You must provide some text for the message")
+        raise Chatkit::MissingParameterError.new("You must provide some text for the message")
       end
 
       attachment = options[:attachment]
 
       unless attachment.nil?
         if attachment[:resource_link].nil?
-          raise Chatkit::Error.new("You must provide a resource_link for the message attachment")
+          raise Chatkit::MissingParameterError.new("You must provide a resource_link for the message attachment")
         end
 
         valid_file_types = ['image', 'video', 'audio', 'file']
 
         if attachment[:type].nil? || valid_file_types.include?(attachment[:type])
-          raise Chatkit::Error.new(
+          raise Chatkit::MissingParameterError.new(
             "You must provide a valid type for the message attachment, i.e. one of: #{valid_file_types.join(', ')}"
           )
         end
@@ -363,6 +365,18 @@ module Chatkit
         path: "/rooms/#{options[:room_id]}/messages",
         body: payload,
         jwt: generate_su_token({ user_id: options[:sender_id] })
+      })
+    end
+
+    def delete_message(options)
+      if options[:id].nil?
+        raise Chatkit::MissingParameterError.new("You must provide the ID of the message you want to delete")
+      end
+
+      api_request({
+        method: "DELETE",
+        path: "/messages/#{options[:id]}",
+        jwt: generate_su_token
       })
     end
 
@@ -394,7 +408,7 @@ module Chatkit
 
     def assign_room_role_to_user(options)
       if options[:room_id].nil?
-        raise Chatkit::Error.new("You must provide a room ID to assign a room role to a user")
+        raise Chatkit::MissingParameterError.new("You must provide a room ID to assign a room role to a user")
       end
 
       assign_role_to_user(options)
@@ -410,7 +424,7 @@ module Chatkit
 
     def get_user_roles(options)
       if options[:user_id].nil?
-        raise Chatkit::Error.new("You must provide the ID of the user whose rooms you want to fetch")
+        raise Chatkit::MissingParameterError.new("You must provide the ID of the user whose rooms you want to fetch")
       end
 
       authorizer_request({
@@ -426,7 +440,7 @@ module Chatkit
 
     def remove_room_role_for_user(options)
       if options[:room_id].nil?
-        raise Chatkit::Error.new("You must provide a room ID")
+        raise Chatkit::MissingParameterError.new("You must provide a room ID")
       end
 
       remove_role_for_user(options)
@@ -456,11 +470,11 @@ module Chatkit
 
     def get_read_cursor(options)
       if options[:user_id].nil?
-        raise Chatkit::Error.new("You must provide the ID of the user whose read cursor you want to fetch")
+        raise Chatkit::MissingParameterError.new("You must provide the ID of the user whose read cursor you want to fetch")
       end
 
       if options[:room_id].nil?
-        raise Chatkit::Error.new("You must provide the ID of the room that you want the read cursor for")
+        raise Chatkit::MissingParameterError.new("You must provide the ID of the room that you want the read cursor for")
       end
 
       cursors_request({
@@ -472,15 +486,15 @@ module Chatkit
 
     def set_read_cursor(options)
       if options[:user_id].nil?
-        raise Chatkit::Error.new("You must provide the ID of the user whose read cursor you want to set")
+        raise Chatkit::MissingParameterError.new("You must provide the ID of the user whose read cursor you want to set")
       end
 
       if options[:room_id].nil?
-        raise Chatkit::Error.new("You must provide the ID of the room you want to set the user's cursor in")
+        raise Chatkit::MissingParameterError.new("You must provide the ID of the room you want to set the user's cursor in")
       end
 
       if options[:position].nil?
-        raise Chatkit::Error.new("You must provide position of the read cursor")
+        raise Chatkit::MissingParameterError.new("You must provide position of the read cursor")
       end
 
       cursors_request({
@@ -493,7 +507,7 @@ module Chatkit
 
     def get_user_read_cursors(options)
       if options[:user_id].nil?
-        raise Chatkit::Error.new("You must provide the ID of the user whose read cursors you want to fetch")
+        raise Chatkit::MissingParameterError.new("You must provide the ID of the user whose read cursors you want to fetch")
       end
 
       cursors_request({
@@ -505,7 +519,7 @@ module Chatkit
 
     def get_read_cursors_for_room(options)
       if options[:room_id].nil?
-        raise Chatkit::Error.new("You must provide the ID of the room that you want the read cursors for")
+        raise Chatkit::MissingParameterError.new("You must provide the ID of the room that you want the read cursors for")
       end
 
       cursors_request({
@@ -533,7 +547,13 @@ module Chatkit
 
     def make_request(instance, options)
       options.merge!({ headers: { "Content-Type": "application/json" } })
-      format_response(instance.request(options))
+      begin
+        format_response(instance.request(options))
+      rescue PusherPlatform::ErrorResponse => e
+        raise Chatkit::ResponseError.new(e)
+      rescue PusherPlatform::Error => e
+        raise Chatkit::Error.new(e.message)
+      end
     end
 
     def format_response(res)
@@ -548,7 +568,7 @@ module Chatkit
 
     def get_rooms_for_user(options)
       if options[:id].nil?
-        raise Chatkit::Error.new("You must provide the ID of the user whose rooms you want to fetch")
+        raise Chatkit::MissingParameterError.new("You must provide the ID of the user whose rooms you want to fetch")
       end
 
       request_options = {
@@ -566,11 +586,11 @@ module Chatkit
 
     def create_role(options)
       if options[:name].nil?
-        raise Chatkit::Error.new("You must provide a name for the role")
+        raise Chatkit::MissingParameterError.new("You must provide a name for the role")
       end
 
       if options[:permissions].nil?
-        raise Chatkit::Error.new("You must provide permissions for the role, even if it's an empty list")
+        raise Chatkit::MissingParameterError.new("You must provide permissions for the role, even if it's an empty list")
       end
 
       authorizer_request({
@@ -587,7 +607,7 @@ module Chatkit
 
     def delete_role(options)
       if options[:name].nil?
-        raise Chatkit::Error.new("You must provide the role's name")
+        raise Chatkit::MissingParameterError.new("You must provide the role's name")
       end
 
       authorizer_request({
@@ -599,11 +619,11 @@ module Chatkit
 
     def assign_role_to_user(options)
       if options[:name].nil?
-        raise Chatkit::Error.new("You must provide the role's name")
+        raise Chatkit::MissingParameterError.new("You must provide the role's name")
       end
 
       if options[:user_id].nil?
-        raise Chatkit::Error.new("You must provide the ID of the user you want to assign the role to")
+        raise Chatkit::MissingParameterError.new("You must provide the ID of the user you want to assign the role to")
       end
 
       body = { name: options[:name] }
@@ -622,7 +642,7 @@ module Chatkit
 
     def remove_role_for_user(options)
       if options[:user_id].nil?
-        raise Chatkit::Error.new("You must provide the ID of the user you want to remove the role for")
+        raise Chatkit::MissingParameterError.new("You must provide the ID of the user you want to remove the role for")
       end
 
       request_options = {
@@ -640,7 +660,7 @@ module Chatkit
 
     def get_permissions_for_role(options)
       if options[:name].nil?
-        raise Chatkit::Error.new("You must provide the name of the role you want to fetch the permissions of")
+        raise Chatkit::MissingParameterError.new("You must provide the name of the role you want to fetch the permissions of")
       end
 
       authorizer_request({
@@ -652,14 +672,14 @@ module Chatkit
 
     def update_permissions_for_role(options)
       if options[:name].nil?
-        raise Chatkit::Error.new("You must provide the name of the role you want to update the permissions of")
+        raise Chatkit::MissingParameterError.new("You must provide the name of the role you want to update the permissions of")
       end
 
       permissions_to_add = options[:permissions_to_add]
       permissions_to_remove = options[:permissions_to_remove]
 
       if permissions_to_add.empty? && permissions_to_remove.empty?
-        raise Chatkit::Error.new("permissions_to_add and permissions_to_remove cannot both be empty")
+        raise Chatkit::MissingParameterError.new("permissions_to_add and permissions_to_remove cannot both be empty")
       end
 
       body = {}
