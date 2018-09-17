@@ -5,4 +5,8 @@ chatkit = Chatkit::Client.new({
   key: "the-id-bit:the-secret-bit"
 })
 
-p chatkit.assign_room_role_to_user("mcflurry", "adminzz", 123)
+p chatkit.assign_room_role_to_user({
+  name: "admin",
+  user_id: "ham",
+  room_id: 123
+})

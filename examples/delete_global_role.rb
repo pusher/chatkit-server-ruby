@@ -5,4 +5,4 @@ chatkit = Chatkit::Client.new({
   key: "the-id-bit:the-secret-bit"
 })
 
-p chatkit.delete_global_role("myfavrole")
+p chatkit.delete_global_role({ name: "mcflurry" })

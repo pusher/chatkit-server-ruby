@@ -5,4 +5,4 @@ chatkit = Chatkit::Client.new({
   key: "the-id-bit:the-secret-bit"
 })
 
-p chatkit.create_user("deathstar", "Darth Vader")
+p chatkit.create_user({ id: "deathstar", name: "Darth Vader" })
