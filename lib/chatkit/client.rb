@@ -428,7 +428,7 @@ module Chatkit
 
     def get_user_roles(options)
       if options[:user_id].nil?
-        raise Chatkit::MissingParameterError.new("You must provide the ID of the user whose rooms you want to fetch")
+        raise Chatkit::MissingParameterError.new("You must provide the ID of the user whose roles you want to fetch")
       end
 
       authorizer_request({
