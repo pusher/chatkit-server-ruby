@@ -7,5 +7,5 @@ Gem::Specification.new do |s|
   s.email       = 'support@pusher.com'
   s.files       = `git ls-files -- lib/*`.split("\n")
 
-  s.add_dependency 'pusher-platform', '~> 0.10.0'
+  s.add_dependency 'pusher-platform', '~> 0.11.0'
 end

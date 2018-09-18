@@ -19,7 +19,11 @@ module Chatkit
         key: options[:key],
         port: options[:port],
         host: options[:host],
-        client: options[:client]
+        client: options[:client],
+        sdk_info: PusherPlatform::SDKInfo.new({
+          product_name: 'chatkit',
+          version: '0.7.2'
+        })
       }
 
       @api_instance = PusherPlatform::Instance.new(

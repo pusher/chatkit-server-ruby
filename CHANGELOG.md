@@ -23,7 +23,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 }
 ```
 
-- Bump pusher-platform dependency to 0.10.0
+- Bump pusher-platform dependency to 0.11.0
 - Unified all errors under a `Chatkit::Error` type
 
 ### Additions

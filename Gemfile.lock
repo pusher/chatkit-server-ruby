@@ -2,14 +2,14 @@ PATH
   remote: .
   specs:
     pusher-chatkit-server (0.7.2)
-      pusher-platform (~> 0.10.0)
+      pusher-platform (~> 0.11.0)
 
 GEM
   remote: https://rubygems.org/
   specs:
     excon (0.62.0)
     jwt (2.1.0)
-    pusher-platform (0.10.0)
+    pusher-platform (0.11.0)
       excon (~> 0.62.0)
       jwt (~> 2.1)
 
