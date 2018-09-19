@@ -57,16 +57,28 @@ module Chatkit
     end
 
     def generate_access_token(options)
+      if options.empty?
+        raise Chatkit::Error.new("You must provide a either a user_id or `su: true`")
+      end
+
       @api_instance.generate_access_token(options)
     end
 
     def generate_su_token(options = {})
-      generate_access_token({ su: true }.merge(options))[:token]
+      generate_access_token({ su: true }.merge(options))
     end
 
     # User API
 
     def create_user(options)
+      if options[:id].nil?
+        raise Chatkit::MissingParameterError.new("You must provide an ID for the user you want to create")
+      end
+
+      if options[:name].nil?
+        raise Chatkit::MissingParameterError.new("You must provide a name for the user you want to create")
+      end
+
       body = {
         id: options[:id],
         name: options[:name]
@@ -84,7 +96,7 @@ module Chatkit
         method: "POST",
         path: "/users",
         body: body,
-        jwt: generate_su_token
+        jwt: generate_su_token[:token]
       })
     end
 
@@ -97,7 +109,7 @@ module Chatkit
         method: "POST",
         path: "/batch_users",
         body: options,
-        jwt: generate_su_token
+        jwt: generate_su_token[:token]
       })
     end
 
@@ -115,7 +127,7 @@ module Chatkit
         method: "PUT",
         path: "/users/#{options[:id]}",
         body: payload,
-        jwt: generate_su_token({ user_id: options[:id] })
+        jwt: generate_su_token({ user_id: options[:id] })[:token]
       })
     end
 
@@ -127,7 +139,7 @@ module Chatkit
       api_request({
         method: "DELETE",
         path: "/users/#{options[:id]}",
-        jwt: generate_su_token
+        jwt: generate_su_token[:token]
       })
     end
 
@@ -139,7 +151,7 @@ module Chatkit
       api_request({
         method: "GET",
         path: "/users/#{options[:id]}",
-        jwt: generate_su_token
+        jwt: generate_su_token[:token]
       })
     end
 
@@ -147,22 +159,23 @@ module Chatkit
       request_options = {
         method: "GET",
         path: "/users",
-        jwt: generate_su_token
+        jwt: generate_su_token[:token]
       }
 
       unless options.nil?
+        query = {}
+        query[:from_ts] = options[:from_timestamp] unless options[:from_timestamp].nil?
+        query[:limit] = options[:limit] unless options[:limit].nil?
+
         request_options.merge!({
-          query: {
-            from_ts: options[:from_timestamp],
-            limit: options[:limit],
-          }
+          query: query
         })
       end
 
       api_request(request_options)
     end
 
-    def get_users_by_ids(options)
+    def get_users_by_id(options)
       if options[:user_ids].nil?
         raise Chatkit::MissingParameterError.new("You must provide the IDs of the users you want to fetch")
       end
@@ -173,7 +186,7 @@ module Chatkit
         query: {
           id: options[:user_ids],
         },
-        jwt: generate_su_token
+        jwt: generate_su_token[:token]
       })
     end
 
@@ -201,7 +214,7 @@ module Chatkit
         method: "POST",
         path: "/rooms",
         body: body,
-        jwt: generate_su_token({ user_id: options[:creator_id] })
+        jwt: generate_su_token({ user_id: options[:creator_id] })[:token]
       })
     end
 
@@ -218,7 +231,7 @@ module Chatkit
         method: "PUT",
         path: "/rooms/#{options[:id]}",
         body: payload,
-        jwt: generate_su_token
+        jwt: generate_su_token[:token]
       })
     end
 
@@ -230,7 +243,7 @@ module Chatkit
       api_request({
         method: "DELETE",
         path: "/rooms/#{options[:id]}",
-        jwt: generate_su_token
+        jwt: generate_su_token[:token]
       })
     end
 
@@ -242,7 +255,7 @@ module Chatkit
       api_request({
         method: "GET",
         path: "/rooms/#{options[:id]}",
-        jwt: generate_su_token
+        jwt: generate_su_token[:token]
       })
     end
 
@@ -250,17 +263,16 @@ module Chatkit
       request_options = {
         method: "GET",
         path: "/rooms",
-        jwt: generate_su_token
+        jwt: generate_su_token[:token]
       }
 
-      include_private = !options.nil? && !options[:include_private].nil? ? options[:include_private] : false
-
       unless options.nil?
+        query = {}
+        query[:include_private] = !options[:include_private].nil? ? options[:include_private] : false
+        query[:from_id] = options[:from_id] unless options[:from_id].nil?
+
         request_options.merge!({
-          query: {
-            from_id: options[:from_id],
-            include_private: include_private
-          }
+          query: query
         })
       end
 
@@ -289,7 +301,7 @@ module Chatkit
         method: "PUT",
         path: "/rooms/#{options[:room_id]}/users/add",
         body: { user_ids: options[:user_ids] },
-        jwt: generate_su_token
+        jwt: generate_su_token[:token]
       })
     end
 
@@ -306,7 +318,7 @@ module Chatkit
         method: "PUT",
         path: "/rooms/#{options[:room_id]}/users/remove",
         body: { user_ids: options[:user_ids] },
-        jwt: generate_su_token
+        jwt: generate_su_token[:token]
       })
     end
 
@@ -326,7 +338,7 @@ module Chatkit
         method: "GET",
         path: "/rooms/#{options[:room_id]}/messages",
         query: query_params,
-        jwt: generate_su_token
+        jwt: generate_su_token[:token]
       })
     end
 
@@ -368,7 +380,7 @@ module Chatkit
         method: "POST",
         path: "/rooms/#{options[:room_id]}/messages",
         body: payload,
-        jwt: generate_su_token({ user_id: options[:sender_id] })
+        jwt: generate_su_token({ user_id: options[:sender_id] })[:token]
       })
     end
 
@@ -380,7 +392,7 @@ module Chatkit
       api_request({
         method: "DELETE",
         path: "/messages/#{options[:id]}",
-        jwt: generate_su_token
+        jwt: generate_su_token[:token]
       })
     end
 
@@ -422,7 +434,7 @@ module Chatkit
       authorizer_request({
         method: "GET",
         path: "/roles",
-        jwt: generate_su_token
+        jwt: generate_su_token[:token]
       })
     end
 
@@ -434,7 +446,7 @@ module Chatkit
       authorizer_request({
         method: "GET",
         path: "/users/#{options[:user_id]}/roles",
-        jwt: generate_su_token
+        jwt: generate_su_token[:token]
       })
     end
 
@@ -484,7 +496,7 @@ module Chatkit
       cursors_request({
         method: "GET",
         path: "/cursors/0/rooms/#{options[:room_id]}/users/#{options[:user_id]}",
-        jwt: generate_su_token
+        jwt: generate_su_token[:token]
       })
     end
 
@@ -505,7 +517,7 @@ module Chatkit
         method: "PUT",
         path: "/cursors/0/rooms/#{options[:room_id]}/users/#{options[:user_id]}",
         body: { position: options[:position] },
-        jwt: generate_su_token
+        jwt: generate_su_token[:token]
       })
     end
 
@@ -517,7 +529,7 @@ module Chatkit
       cursors_request({
         method: "GET",
         path: "/cursors/0/users/#{options[:user_id]}",
-        jwt: generate_su_token
+        jwt: generate_su_token[:token]
       })
     end
 
@@ -529,7 +541,7 @@ module Chatkit
       cursors_request({
         method: "GET",
         path: "/cursors/0/rooms/#{options[:room_id]}",
-        jwt: generate_su_token
+        jwt: generate_su_token[:token]
       })
     end
 
@@ -561,7 +573,7 @@ module Chatkit
     end
 
     def format_response(res)
-      body = res.body.empty? ? nil : JSON.parse(res.body)
+      body = res.body.empty? ? nil : JSON.parse(res.body, { symbolize_names: true })
 
       {
         status: res.status,
@@ -578,7 +590,7 @@ module Chatkit
       request_options = {
         method: "GET",
         path: "/users/#{options[:id]}/rooms",
-        jwt: generate_su_token
+        jwt: generate_su_token[:token]
       }
 
       unless options[:joinable].nil?
@@ -605,7 +617,7 @@ module Chatkit
           name: options[:name],
           permissions: options[:permissions],
         },
-        jwt: generate_su_token
+        jwt: generate_su_token[:token]
       })
     end
 
@@ -617,7 +629,7 @@ module Chatkit
       authorizer_request({
         method: "DELETE",
         path: "/roles/#{options[:name]}/scope/#{options[:scope]}",
-        jwt: generate_su_token
+        jwt: generate_su_token[:token]
       })
     end
 
@@ -640,7 +652,7 @@ module Chatkit
         method: "PUT",
         path: "/users/#{options[:user_id]}/roles",
         body: body,
-        jwt: generate_su_token
+        jwt: generate_su_token[:token]
       })
     end
 
@@ -652,7 +664,7 @@ module Chatkit
       request_options = {
         method: "DELETE",
         path: "/users/#{options[:user_id]}/roles",
-        jwt: generate_su_token
+        jwt: generate_su_token[:token]
       }
 
       unless options[:room_id].nil?
@@ -670,7 +682,7 @@ module Chatkit
       authorizer_request({
         method: "GET",
         path: "/roles/#{options[:name]}/scope/#{options[:scope]}/permissions",
-        jwt: generate_su_token
+        jwt: generate_su_token[:token]
       })
     end
 
@@ -694,7 +706,7 @@ module Chatkit
         method: "PUT",
         path: "/roles/#{options[:name]}/scope/#{options[:scope]}/permissions",
         body: body,
-        jwt: generate_su_token
+        jwt: generate_su_token[:token]
       })
     end
   end

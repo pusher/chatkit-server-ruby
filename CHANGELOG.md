@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Changes
 
 - *Breaking:* All functions now take a single hash as their sole parameter
+- *Breaking:* `get_users_by_ids` has been renamed to `get_users_by_id`
+- *Breaking:* `generate_su_token` now returns a hash with the keys `token` and `expires_in`, to match the return value of `generate_access_token`
 - *Breaking*: All functions that interact with the API (i.e. everything but authentication methods) either raise a `PusherPlatform::ErrorResponse` or return a hash of the form:
 
 ```ruby
@@ -23,7 +25,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 }
 ```
 
-- Bump pusher-platform dependency to 0.11.0
+- Bump pusher-platform dependency to 0.11.1
 - Unified all errors under a `Chatkit::Error` type
 
 ### Additions
