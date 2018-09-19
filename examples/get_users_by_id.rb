@@ -5,4 +5,4 @@ chatkit = Chatkit::Client.new({
   key: "the-id-bit:the-secret-bit"
 })
 
-p chatkit.get_users_by_ids({ user_ids: ['ham', 'test'] })
+p chatkit.get_users_by_id({ user_ids: ['ham', 'test'] })

@@ -5,4 +5,4 @@ chatkit = Chatkit::Client.new({
   key: 'the-id-bit:the-secret-bit'
 })
 
-p chatkit.get_read_cursors_for_room({ room_id: 123 })
+p chatkit.get_room_read_cursors({ room_id: 123 })

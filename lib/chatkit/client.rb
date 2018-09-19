@@ -364,7 +364,7 @@ module Chatkit
 
         valid_file_types = ['image', 'video', 'audio', 'file']
 
-        if attachment[:type].nil? || valid_file_types.include?(attachment[:type])
+        if attachment[:type].nil? || !valid_file_types.include?(attachment[:type])
           raise Chatkit::MissingParameterError.new(
             "You must provide a valid type for the message attachment, i.e. one of: #{valid_file_types.join(', ')}"
           )
@@ -533,7 +533,7 @@ module Chatkit
       })
     end
 
-    def get_read_cursors_for_room(options)
+    def get_room_read_cursors(options)
       if options[:room_id].nil?
         raise Chatkit::MissingParameterError.new("You must provide the ID of the room that you want the read cursors for")
       end
@@ -694,13 +694,13 @@ module Chatkit
       permissions_to_add = options[:permissions_to_add]
       permissions_to_remove = options[:permissions_to_remove]
 
-      if permissions_to_add.empty? && permissions_to_remove.empty?
+      if (permissions_to_add.nil? || permissions_to_add.empty?) && (permissions_to_remove.nil? || permissions_to_remove.empty?)
         raise Chatkit::MissingParameterError.new("permissions_to_add and permissions_to_remove cannot both be empty")
       end
 
       body = {}
-      body[:add_permissions] = permissions_to_add unless permissions_to_add.empty?
-      body[:remove_permissions] = permissions_to_remove unless permissions_to_remove.empty?
+      body[:add_permissions] = permissions_to_add unless permissions_to_add.nil? || permissions_to_add.empty?
+      body[:remove_permissions] = permissions_to_remove unless permissions_to_remove.nil? ||permissions_to_remove.empty?
 
       authorizer_request({
         method: "PUT",

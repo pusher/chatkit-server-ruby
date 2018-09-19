@@ -48,7 +48,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
     - `get_read_cursor`
     - `set_read_cursor`
     - `get_user_read_cursors`
-    - `get_read_cursors_for_room`
+    - `get_room_read_cursors`
 
 - `get_rooms` supports the `include_private` option
 
