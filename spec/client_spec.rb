@@ -1,5 +1,6 @@
 require 'spec_helper'
 require 'time'
+require 'securerandom'
 
 describe Chatkit::Client do
   before(:example) do
@@ -91,22 +92,24 @@ describe Chatkit::Client do
 
     describe "should return response payload if" do
       it "an id and name are provided" do
-        res = @chatkit.create_user({ id: 'ham', name: 'Ham' })
+        user_id = SecureRandom.uuid
+        res = @chatkit.create_user({ id: user_id, name: 'Ham' })
         expect(res[:status]).to eq 201
         expect(res[:headers]).to_not be_empty
-        expect(res[:body][:id]).to eq 'ham'
+        expect(res[:body][:id]).to eq user_id
         expect(res[:body][:name]).to eq 'Ham'
       end
 
       it "an id, name, avatar_url and custom_data are provided" do
+        user_id = SecureRandom.uuid
         res = @chatkit.create_user({
-          id: 'ham',
+          id: user_id,
           name: 'Ham',
           avatar_url: 'https://placekitten.com/200/300',
           custom_data: { something: 'CUSTOM' }
         })
         expect(res[:status]).to eq 201
-        expect(res[:body][:id]).to eq 'ham'
+        expect(res[:body][:id]).to eq user_id
         expect(res[:body][:name]).to eq 'Ham'
         expect(res[:body][:avatar_url]).to eq 'https://placekitten.com/200/300'
         expect(res[:body][:custom_data]).to eq({ something: 'CUSTOM' })
@@ -125,18 +128,20 @@ describe Chatkit::Client do
 
     describe "should return response payload if" do
       it "a valid set of options are provided" do
+        user_id = SecureRandom.uuid
+        user_id2 = SecureRandom.uuid
         res = @chatkit.create_users({
           users: [
-            { id: 'ham', name: 'Ham' },
-            { id: 'ham2', name: 'Ham2' }
+            { id: user_id, name: 'Ham' },
+            { id: user_id2, name: 'Ham2' }
           ]
         })
         expect(res[:status]).to eq 201
         expect(res[:headers]).to_not be_empty
-        expect(res[:body][0][:id]).to eq 'ham'
-        expect(res[:body][0][:name]).to eq 'Ham'
-        expect(res[:body][1][:id]).to eq 'ham2'
-        expect(res[:body][1][:name]).to eq 'Ham2'
+        ids = res[:body].map { |u| u[:id] }
+        names = res[:body].map { |u| u[:name] }
+        expect(ids - [user_id, user_id2]).to be_empty
+        expect(names - ['Ham', 'Ham2']).to be_empty
       end
     end
   end
@@ -152,20 +157,17 @@ describe Chatkit::Client do
 
     describe "should return response payload if" do
       it "a valid set of options are provided" do
+        user_id = SecureRandom.uuid
         create_res = @chatkit.create_user({
-          id: 'ham',
+          id: user_id,
           name: 'Ham',
           avatar_url: 'https://placekitten.com/200/300',
           custom_data: { something: 'CUSTOM' }
         })
         expect(create_res[:status]).to eq 201
-        expect(create_res[:body][:id]).to eq 'ham'
-        expect(create_res[:body][:name]).to eq 'Ham'
-        expect(create_res[:body][:avatar_url]).to eq 'https://placekitten.com/200/300'
-        expect(create_res[:body][:custom_data]).to eq({ something: 'CUSTOM' })
 
         update_res = @chatkit.update_user({
-          id: 'ham',
+          id: user_id,
           name: 'No longer Ham',
           avatar_url: 'https://test.update.com',
           custom_data: { something: 'NEW', and: 777 }
@@ -186,11 +188,12 @@ describe Chatkit::Client do
     end
 
     describe "should return response payload if" do
+      user_id = SecureRandom.uuid
       it "an id is provided" do
-        create_res = @chatkit.create_user({ id: 'ham', name: 'Ham' })
+        create_res = @chatkit.create_user({ id: user_id, name: 'Ham' })
         expect(create_res[:status]).to eq 201
 
-        update_res = @chatkit.delete_user({ id: 'ham' })
+        update_res = @chatkit.delete_user({ id: user_id })
         expect(update_res[:status]).to eq 204
         expect(update_res[:body]).to be_nil
       end
@@ -208,12 +211,13 @@ describe Chatkit::Client do
 
     describe "should return response payload if" do
       it "an id is provided" do
-        create_res = @chatkit.create_user({ id: 'ham', name: 'Ham' })
+        user_id = SecureRandom.uuid
+        create_res = @chatkit.create_user({ id: user_id, name: 'Ham' })
         expect(create_res[:status]).to eq 201
 
-        update_res = @chatkit.get_user({ id: 'ham' })
+        update_res = @chatkit.get_user({ id: user_id })
         expect(update_res[:status]).to eq 200
-        expect(create_res[:body][:id]).to eq 'ham'
+        expect(create_res[:body][:id]).to eq user_id
         expect(create_res[:body][:name]).to eq 'Ham'
       end
     end
@@ -222,24 +226,28 @@ describe Chatkit::Client do
   describe '#get_users' do
     describe "should return response payload if" do
       it "no options are provided" do
-        create_res = @chatkit.create_user({ id: 'ham', name: 'Ham' })
+        user_id = SecureRandom.uuid
+        user_id2 = SecureRandom.uuid
+        create_res = @chatkit.create_user({ id: user_id, name: 'Ham' })
         expect(create_res[:status]).to eq 201
-        create_res_two = @chatkit.create_user({ id: 'ham2', name: 'Ham2' })
+        create_res_two = @chatkit.create_user({ id: user_id2, name: 'Ham2' })
         expect(create_res_two[:status]).to eq 201
 
         get_users_res = @chatkit.get_users
         expect(get_users_res[:status]).to eq 200
-        expect(get_users_res[:body][0][:id]).to eq 'ham'
+        expect(get_users_res[:body][0][:id]).to eq user_id
         expect(get_users_res[:body][0][:name]).to eq 'Ham'
-        expect(get_users_res[:body][1][:id]).to eq 'ham2'
+        expect(get_users_res[:body][1][:id]).to eq user_id2
         expect(get_users_res[:body][1][:name]).to eq 'Ham2'
       end
 
       it "a limit is provided" do
+        user_id = SecureRandom.uuid
+        user_id2 = SecureRandom.uuid
         res = @chatkit.create_users({
           users: [
-            { id: 'ham', name: 'Ham' },
-            { id: 'ham2', name: 'Ham2' }
+            { id: user_id, name: 'Ham' },
+            { id: user_id2, name: 'Ham2' }
           ]
         })
         expect(res[:status]).to eq 201
@@ -247,38 +255,40 @@ describe Chatkit::Client do
         get_users_res = @chatkit.get_users({ limit: 1 })
         expect(get_users_res[:status]).to eq 200
         expect(get_users_res[:body].count).to eq 1
-        expect(get_users_res[:body][0][:id]).to eq 'ham2'
+        expect(get_users_res[:body][0][:id]).to eq user_id2
         expect(get_users_res[:body][0][:name]).to eq 'Ham2'
       end
 
       it "from_timestamp is provided" do
         start_timestamp = Time.now.iso8601
+        user_id = SecureRandom.uuid
+        user_id2 = SecureRandom.uuid
 
         sleep 1
 
-        create_res = @chatkit.create_user({ id: 'ham', name: 'Ham' })
+        create_res = @chatkit.create_user({ id: user_id, name: 'Ham' })
         expect(create_res[:status]).to eq 201
 
         sleep 2
 
         before_second_user_timestamp = Time.now.iso8601
 
-        create_res_two = @chatkit.create_user({ id: 'ham2', name: 'Ham2' })
+        create_res_two = @chatkit.create_user({ id: user_id2, name: 'Ham2' })
         expect(create_res_two[:status]).to eq 201
 
         get_users_res = @chatkit.get_users({ from_timestamp: start_timestamp })
 
         expect(get_users_res[:status]).to eq 200
         expect(get_users_res[:body].count).to eq 2
-        expect(get_users_res[:body][0][:id]).to eq 'ham'
+        expect(get_users_res[:body][0][:id]).to eq user_id
         expect(get_users_res[:body][0][:name]).to eq 'Ham'
-        expect(get_users_res[:body][1][:id]).to eq 'ham2'
+        expect(get_users_res[:body][1][:id]).to eq user_id2
         expect(get_users_res[:body][1][:name]).to eq 'Ham2'
 
         get_users_res_two = @chatkit.get_users({ from_timestamp: before_second_user_timestamp })
         expect(get_users_res_two[:status]).to eq 200
         expect(get_users_res_two[:body].count).to eq 1
-        expect(get_users_res_two[:body][0][:id]).to eq 'ham2'
+        expect(get_users_res_two[:body][0][:id]).to eq user_id2
         expect(get_users_res_two[:body][0][:name]).to eq 'Ham2'
       end
     end
@@ -295,18 +305,20 @@ describe Chatkit::Client do
 
     describe "should return response payload if" do
       it "user_ids are provided" do
-        create_res = @chatkit.create_user({ id: 'ham', name: 'Ham' })
+        user_id = SecureRandom.uuid
+        user_id2 = SecureRandom.uuid
+        create_res = @chatkit.create_user({ id: user_id, name: 'Ham' })
         expect(create_res[:status]).to eq 201
-        create_res_two = @chatkit.create_user({ id: 'ham2', name: 'Ham2' })
+        create_res_two = @chatkit.create_user({ id: user_id2, name: 'Ham2' })
         expect(create_res_two[:status]).to eq 201
 
-        get_users_res = @chatkit.get_users_by_id({ user_ids: ['ham', 'ham2'] })
+        get_users_res = @chatkit.get_users_by_id({ user_ids: [user_id, user_id2] })
         expect(get_users_res[:status]).to eq 200
         expect(get_users_res[:body].count).to eq 2
-        expect(get_users_res[:body][0][:id]).to eq 'ham'
-        expect(get_users_res[:body][0][:name]).to eq 'Ham'
-        expect(get_users_res[:body][1][:id]).to eq 'ham2'
-        expect(get_users_res[:body][1][:name]).to eq 'Ham2'
+        ids = get_users_res[:body].map { |u| u[:id] }
+        names = get_users_res[:body].map { |u| u[:name] }
+        expect(ids - [user_id, user_id2]).to be_empty
+        expect(names - ['Ham', 'Ham2']).to be_empty
       end
     end
   end
@@ -328,35 +340,38 @@ describe Chatkit::Client do
 
     describe "should return response payload if" do
       it "a creator_id and name are provided" do
-        res = @chatkit.create_user({ id: 'ham', name: 'Ham' })
+        user_id = SecureRandom.uuid
+        res = @chatkit.create_user({ id: user_id, name: 'Ham' })
         expect(res[:status]).to eq 201
 
-        room_res = @chatkit.create_room({ creator_id: 'ham', name: 'my room' })
+        room_res = @chatkit.create_room({ creator_id: user_id, name: 'my room' })
         expect(room_res[:status]).to eq 201
         expect(room_res[:body]).to have_key :id
         expect(room_res[:body][:name]).to eq 'my room'
         expect(room_res[:body][:private]).to be false
-        expect(room_res[:body][:member_user_ids]).to eq ['ham']
+        expect(room_res[:body][:member_user_ids]).to eq [user_id]
       end
 
       it "a creator_id, name, user_ids are provided and the room is private" do
-        res = @chatkit.create_user({ id: 'ham', name: 'Ham' })
+        user_id = SecureRandom.uuid
+        user_id2 = SecureRandom.uuid
+        res = @chatkit.create_user({ id: user_id, name: 'Ham' })
         expect(res[:status]).to eq 201
 
-        res_two = @chatkit.create_user({ id: 'ham2', name: 'Ham2' })
+        res_two = @chatkit.create_user({ id: user_id2, name: 'Ham2' })
         expect(res_two[:status]).to eq 201
 
         room_res = @chatkit.create_room({
-          creator_id: 'ham',
+          creator_id: user_id,
           name: 'my room',
-          user_ids: ['ham2'],
+          user_ids: [user_id2],
           private: true
         })
         expect(room_res[:status]).to eq 201
         expect(room_res[:body]).to have_key :id
         expect(room_res[:body][:name]).to eq 'my room'
         expect(room_res[:body][:private]).to be true
-        expect(room_res[:body][:member_user_ids]).to eq ['ham', 'ham2']
+        expect(room_res[:body][:member_user_ids] - [user_id, user_id2]).to be_empty
       end
     end
   end
@@ -372,11 +387,12 @@ describe Chatkit::Client do
 
     describe "should return response payload if" do
       it "a valid set of options are provided" do
-        res = @chatkit.create_user({ id: 'ham', name: 'Ham' })
+        user_id = SecureRandom.uuid
+        res = @chatkit.create_user({ id: user_id, name: 'Ham' })
         expect(res[:status]).to eq 201
 
         room_res = @chatkit.create_room({
-          creator_id: 'ham',
+          creator_id: user_id,
           name: 'my room',
           private: true
         })
@@ -404,10 +420,11 @@ describe Chatkit::Client do
 
     describe "should return response payload if" do
       it "an id is provided" do
-        create_res = @chatkit.create_user({ id: 'ham', name: 'Ham' })
+        user_id = SecureRandom.uuid
+        create_res = @chatkit.create_user({ id: user_id, name: 'Ham' })
         expect(create_res[:status]).to eq 201
 
-        room_res = @chatkit.create_room({ creator_id: 'ham', name: 'my room' })
+        room_res = @chatkit.create_room({ creator_id: user_id, name: 'my room' })
         expect(room_res[:status]).to eq 201
 
         update_res = @chatkit.delete_room({ id: room_res[:body][:id] })
@@ -428,10 +445,11 @@ describe Chatkit::Client do
 
     describe "should return response payload if" do
       it "an id is provided" do
-        create_res = @chatkit.create_user({ id: 'ham', name: 'Ham' })
+        user_id = SecureRandom.uuid
+        create_res = @chatkit.create_user({ id: user_id, name: 'Ham' })
         expect(create_res[:status]).to eq 201
 
-        room_res = @chatkit.create_room({ creator_id: 'ham', name: 'my room' })
+        room_res = @chatkit.create_room({ creator_id: user_id, name: 'my room' })
         expect(room_res[:status]).to eq 201
 
         get_room_res = @chatkit.get_room({ id: room_res[:body][:id] })
@@ -439,7 +457,7 @@ describe Chatkit::Client do
         expect(get_room_res[:body][:id]).to eq room_res[:body][:id]
         expect(get_room_res[:body][:name]).to eq 'my room'
         expect(get_room_res[:body][:private]).to be false
-        expect(get_room_res[:body][:member_user_ids]).to eq ['ham']
+        expect(get_room_res[:body][:member_user_ids]).to eq [user_id]
       end
     end
   end
@@ -447,13 +465,14 @@ describe Chatkit::Client do
   describe '#get_rooms' do
     describe "should return response payload if" do
       it "no options are provided" do
-        create_res = @chatkit.create_user({ id: 'ham', name: 'Ham' })
+        user_id = SecureRandom.uuid
+        create_res = @chatkit.create_user({ id: user_id, name: 'Ham' })
         expect(create_res[:status]).to eq 201
 
-        room_res = @chatkit.create_room({ creator_id: 'ham', name: 'my room' })
+        room_res = @chatkit.create_room({ creator_id: user_id, name: 'my room' })
         expect(room_res[:status]).to eq 201
 
-        room_res_two = @chatkit.create_room({ creator_id: 'ham', name: 'my room 2' })
+        room_res_two = @chatkit.create_room({ creator_id: user_id, name: 'my room 2' })
         expect(room_res_two[:status]).to eq 201
 
         get_rooms_res = @chatkit.get_rooms()
@@ -468,17 +487,18 @@ describe Chatkit::Client do
       end
 
       it "include_private is specified" do
-        create_res = @chatkit.create_user({ id: 'ham', name: 'Ham' })
+        user_id = SecureRandom.uuid
+        create_res = @chatkit.create_user({ id: user_id, name: 'Ham' })
         expect(create_res[:status]).to eq 201
 
         room_res = @chatkit.create_room({
-          creator_id: 'ham',
+          creator_id: user_id,
           name: 'my room',
           private: true
         })
         expect(room_res[:status]).to eq 201
 
-        room_res_two = @chatkit.create_room({ creator_id: 'ham', name: 'my room 2' })
+        room_res_two = @chatkit.create_room({ creator_id: user_id, name: 'my room 2' })
         expect(room_res_two[:status]).to eq 201
 
         get_rooms_res = @chatkit.get_rooms()
@@ -500,17 +520,18 @@ describe Chatkit::Client do
       end
 
       it "include_private and from_id are specified" do
-        create_res = @chatkit.create_user({ id: 'ham', name: 'Ham' })
+        user_id = SecureRandom.uuid
+        create_res = @chatkit.create_user({ id: user_id, name: 'Ham' })
         expect(create_res[:status]).to eq 201
 
         room_res = @chatkit.create_room({
-          creator_id: 'ham',
+          creator_id: user_id,
           name: 'my room',
           private: true
         })
         expect(room_res[:status]).to eq 201
 
-        room_res_two = @chatkit.create_room({ creator_id: 'ham', name: 'my room 2' })
+        room_res_two = @chatkit.create_room({ creator_id: user_id, name: 'my room 2' })
         expect(room_res_two[:status]).to eq 201
 
         get_rooms_res_one = @chatkit.get_rooms({
@@ -544,41 +565,44 @@ describe Chatkit::Client do
 
     describe "should return response payload if" do
       it "an id is provided" do
-        create_res = @chatkit.create_user({ id: 'ham', name: 'Ham' })
+        user_id = SecureRandom.uuid
+        create_res = @chatkit.create_user({ id: user_id, name: 'Ham' })
         expect(create_res[:status]).to eq 201
 
-        room_res = @chatkit.create_room({ creator_id: 'ham', name: 'my room' })
+        room_res = @chatkit.create_room({ creator_id: user_id, name: 'my room' })
         expect(room_res[:status]).to eq 201
 
-        get_user_rooms_res = @chatkit.get_user_rooms({ id: 'ham' })
+        get_user_rooms_res = @chatkit.get_user_rooms({ id: user_id })
         expect(get_user_rooms_res[:status]).to eq 200
         expect(get_user_rooms_res[:body].count).to eq 1
         expect(get_user_rooms_res[:body][0][:id]).to eq room_res[:body][:id]
         expect(get_user_rooms_res[:body][0][:name]).to eq 'my room'
         expect(get_user_rooms_res[:body][0][:private]).to be false
-        expect(get_user_rooms_res[:body][0][:member_user_ids]).to eq ['ham']
+        expect(get_user_rooms_res[:body][0][:member_user_ids]).to eq [user_id]
       end
 
       it "an id is provided and only return the correct rooms" do
-        create_res = @chatkit.create_user({ id: 'ham', name: 'Ham' })
+        user_id = SecureRandom.uuid
+        user_id2 = SecureRandom.uuid
+        create_res = @chatkit.create_user({ id: user_id, name: 'Ham' })
         expect(create_res[:status]).to eq 201
 
-        create_res_two = @chatkit.create_user({ id: 'sarah', name: 'Sarah' })
+        create_res_two = @chatkit.create_user({ id: user_id2, name: 'Sarah' })
         expect(create_res_two[:status]).to eq 201
 
-        room_res = @chatkit.create_room({ creator_id: 'ham', name: 'my room' })
+        room_res = @chatkit.create_room({ creator_id: user_id, name: 'my room' })
         expect(room_res[:status]).to eq 201
 
-        room_res_two = @chatkit.create_room({ creator_id: 'sarah', name: 'sarah room' })
+        room_res_two = @chatkit.create_room({ creator_id: user_id2, name: 'sarah room' })
         expect(room_res_two[:status]).to eq 201
 
-        get_user_rooms_res = @chatkit.get_user_rooms({ id: 'ham' })
+        get_user_rooms_res = @chatkit.get_user_rooms({ id: user_id })
         expect(get_user_rooms_res[:status]).to eq 200
         expect(get_user_rooms_res[:body].count).to eq 1
         expect(get_user_rooms_res[:body][0][:id]).to eq room_res[:body][:id]
         expect(get_user_rooms_res[:body][0][:name]).to eq 'my room'
         expect(get_user_rooms_res[:body][0][:private]).to be false
-        expect(get_user_rooms_res[:body][0][:member_user_ids]).to eq ['ham']
+        expect(get_user_rooms_res[:body][0][:member_user_ids]).to eq [user_id]
       end
     end
   end
@@ -594,29 +618,31 @@ describe Chatkit::Client do
 
     describe "should return response payload if" do
       it "an id is provided" do
-        create_res = @chatkit.create_user({ id: 'ham', name: 'Ham' })
+        user_id = SecureRandom.uuid
+        user_id2 = SecureRandom.uuid
+        create_res = @chatkit.create_user({ id: user_id, name: 'Ham' })
         expect(create_res[:status]).to eq 201
 
-        room_res = @chatkit.create_room({ creator_id: 'ham', name: 'my room' })
+        room_res = @chatkit.create_room({ creator_id: user_id, name: 'my room' })
         expect(room_res[:status]).to eq 201
 
-        get_user_rooms_res = @chatkit.get_user_joinable_rooms({ id: 'ham' })
+        get_user_rooms_res = @chatkit.get_user_joinable_rooms({ id: user_id })
         expect(get_user_rooms_res[:status]).to eq 200
         expect(get_user_rooms_res[:body].count).to eq 0
 
-        create_res_two = @chatkit.create_user({ id: 'sarah', name: 'Sarah' })
+        create_res_two = @chatkit.create_user({ id: user_id2, name: 'Sarah' })
         expect(create_res_two[:status]).to eq 201
 
-        room_res_two = @chatkit.create_room({ creator_id: 'sarah', name: 'sarah room' })
+        room_res_two = @chatkit.create_room({ creator_id: user_id2, name: 'sarah room' })
         expect(room_res_two[:status]).to eq 201
 
-        get_user_rooms_res = @chatkit.get_user_joinable_rooms({ id: 'ham' })
+        get_user_rooms_res = @chatkit.get_user_joinable_rooms({ id: user_id })
         expect(get_user_rooms_res[:status]).to eq 200
         expect(get_user_rooms_res[:body].count).to eq 1
         expect(get_user_rooms_res[:body][0][:id]).to eq room_res_two[:body][:id]
         expect(get_user_rooms_res[:body][0][:name]).to eq 'sarah room'
         expect(get_user_rooms_res[:body][0][:private]).to be false
-        expect(get_user_rooms_res[:body][0][:member_user_ids]).to eq ['sarah']
+        expect(get_user_rooms_res[:body][0][:member_user_ids]).to eq [user_id2]
       end
     end
   end
@@ -638,21 +664,24 @@ describe Chatkit::Client do
 
     describe "should return response payload if" do
       it "an id is provided" do
-        create_res = @chatkit.create_user({ id: 'ham', name: 'Ham' })
+        user_id = SecureRandom.uuid
+        user_id2 = SecureRandom.uuid
+        user_id3 = SecureRandom.uuid
+        create_res = @chatkit.create_user({ id: user_id, name: 'Ham' })
         expect(create_res[:status]).to eq 201
 
-        create_res_two = @chatkit.create_user({ id: 'ham2', name: 'Ham 2' })
+        create_res_two = @chatkit.create_user({ id: user_id2, name: 'Ham 2' })
         expect(create_res_two[:status]).to eq 201
 
-        create_res_three = @chatkit.create_user({ id: 'ham3', name: 'Ham 3' })
+        create_res_three = @chatkit.create_user({ id: user_id3, name: 'Ham 3' })
         expect(create_res_three[:status]).to eq 201
 
-        room_res = @chatkit.create_room({ creator_id: 'ham', name: 'my room' })
+        room_res = @chatkit.create_room({ creator_id: user_id, name: 'my room' })
         expect(room_res[:status]).to eq 201
 
         add_users_res = @chatkit.add_users_to_room({
           room_id: room_res[:body][:id],
-          user_ids: ['ham2', 'ham3']
+          user_ids: [user_id2, user_id3]
         })
         expect(add_users_res[:status]).to eq 204
         expect(add_users_res[:body]).to be_nil
@@ -662,7 +691,7 @@ describe Chatkit::Client do
         expect(get_room_res[:body][:id]).to eq room_res[:body][:id]
         expect(get_room_res[:body][:name]).to eq 'my room'
         expect(get_room_res[:body][:private]).to be false
-        expect(get_room_res[:body][:member_user_ids]).to eq ['ham', 'ham2', 'ham3']
+        expect(get_room_res[:body][:member_user_ids] - [user_id, user_id2, user_id3]).to be_empty
       end
     end
   end
@@ -684,25 +713,31 @@ describe Chatkit::Client do
 
     describe "should return response payload if" do
       it "an id is provided" do
-        create_res = @chatkit.create_user({ id: 'ham', name: 'Ham' })
+        user_id = SecureRandom.uuid
+        user_id2 = SecureRandom.uuid
+        user_id3 = SecureRandom.uuid
+        create_res = @chatkit.create_user({ id: user_id, name: 'Ham' })
         expect(create_res[:status]).to eq 201
 
-        create_res_two = @chatkit.create_user({ id: 'ham2', name: 'Ham 2' })
+        create_res_two = @chatkit.create_user({ id: user_id2, name: 'Ham 2' })
         expect(create_res_two[:status]).to eq 201
 
-        create_res_three = @chatkit.create_user({ id: 'ham3', name: 'Ham 3' })
+        create_res_three = @chatkit.create_user({ id: user_id3, name: 'Ham 3' })
         expect(create_res_three[:status]).to eq 201
 
+        room_res = @chatkit.create_room({ creator_id: user_id, name: 'my room' })
+        expect(room_res[:status]).to eq 201
+
         room_res = @chatkit.create_room({
-          creator_id: 'ham',
+          creator_id: user_id,
           name: 'my room',
-          user_ids: ['ham2', 'ham3']
+          user_ids: [user_id2, user_id3]
         })
         expect(room_res[:status]).to eq 201
 
         remove_users_res = @chatkit.remove_users_from_room({
           room_id: room_res[:body][:id],
-          user_ids: ['ham2', 'ham3']
+          user_ids: [user_id2, user_id3]
         })
         expect(remove_users_res[:status]).to eq 204
         expect(remove_users_res[:body]).to be_nil
@@ -712,7 +747,7 @@ describe Chatkit::Client do
         expect(get_room_res[:body][:id]).to eq room_res[:body][:id]
         expect(get_room_res[:body][:name]).to eq 'my room'
         expect(get_room_res[:body][:private]).to be false
-        expect(get_room_res[:body][:member_user_ids]).to eq ['ham']
+        expect(get_room_res[:body][:member_user_ids]).to eq [user_id]
       end
     end
   end
@@ -780,15 +815,16 @@ describe Chatkit::Client do
 
     describe "should return response payload if" do
       it "a room_id, sender_id, and text are provided" do
-        create_res = @chatkit.create_user({ id: 'ham', name: 'Ham' })
+        user_id = SecureRandom.uuid
+        create_res = @chatkit.create_user({ id: user_id, name: 'Ham' })
         expect(create_res[:status]).to eq 201
 
-        room_res = @chatkit.create_room({ creator_id: 'ham', name: 'my room' })
+        room_res = @chatkit.create_room({ creator_id: user_id, name: 'my room' })
         expect(room_res[:status]).to eq 201
 
         send_message_res = @chatkit.send_message({
           room_id: room_res[:body][:id],
-          sender_id: 'ham',
+          sender_id: user_id,
           text: 'hi 1'
         })
         expect(send_message_res[:status]).to eq 201
@@ -796,15 +832,16 @@ describe Chatkit::Client do
       end
 
       it "a room_id, sender_id, text, and a link attachment are provided" do
-        create_res = @chatkit.create_user({ id: 'ham', name: 'Ham' })
+        user_id = SecureRandom.uuid
+        create_res = @chatkit.create_user({ id: user_id, name: 'Ham' })
         expect(create_res[:status]).to eq 201
 
-        room_res = @chatkit.create_room({ creator_id: 'ham', name: 'my room' })
+        room_res = @chatkit.create_room({ creator_id: user_id, name: 'my room' })
         expect(room_res[:status]).to eq 201
 
         send_message_res = @chatkit.send_message({
           room_id: room_res[:body][:id],
-          sender_id: 'ham',
+          sender_id: user_id,
           text: 'hi 1',
           attachment: {
             resource_link: 'https://placekitten.com/200/300',
@@ -828,22 +865,23 @@ describe Chatkit::Client do
 
     describe "should return response payload if" do
       it "a room_id is provided" do
-        create_res = @chatkit.create_user({ id: 'ham', name: 'Ham' })
+        user_id = SecureRandom.uuid
+        create_res = @chatkit.create_user({ id: user_id, name: 'Ham' })
         expect(create_res[:status]).to eq 201
 
-        room_res = @chatkit.create_room({ creator_id: 'ham', name: 'my room' })
+        room_res = @chatkit.create_room({ creator_id: user_id, name: 'my room' })
         expect(room_res[:status]).to eq 201
 
         send_message_res = @chatkit.send_message({
           room_id: room_res[:body][:id],
-          sender_id: 'ham',
+          sender_id: user_id,
           text: 'hi 1'
         })
         expect(send_message_res[:status]).to eq 201
 
         send_message_res_two = @chatkit.send_message({
           room_id: room_res[:body][:id],
-          sender_id: 'ham',
+          sender_id: user_id,
           text: 'hi 2'
         })
         expect(send_message_res_two[:status]).to eq 201
@@ -853,22 +891,23 @@ describe Chatkit::Client do
         expect(get_messages_res[:body].count).to eq 2
         expect(get_messages_res[:body][0][:id]).to eq send_message_res_two[:body][:message_id]
         expect(get_messages_res[:body][0][:text]).to eq 'hi 2'
-        expect(get_messages_res[:body][0][:user_id]).to eq 'ham'
+        expect(get_messages_res[:body][0][:user_id]).to eq user_id
         expect(get_messages_res[:body][0][:room_id]).to eq room_res[:body][:id]
         expect(get_messages_res[:body][1][:id]).to eq send_message_res[:body][:message_id]
         expect(get_messages_res[:body][1][:text]).to eq 'hi 1'
-        expect(get_messages_res[:body][1][:user_id]).to eq 'ham'
+        expect(get_messages_res[:body][1][:user_id]).to eq user_id
         expect(get_messages_res[:body][1][:room_id]).to eq room_res[:body][:id]
       end
 
       it "a room_id, initial_id, direction, and limit are provided" do
-        create_res = @chatkit.create_user({ id: 'ham', name: 'Ham' })
+        user_id = SecureRandom.uuid
+        create_res = @chatkit.create_user({ id: user_id, name: 'Ham' })
         expect(create_res[:status]).to eq 201
 
-        room_res = @chatkit.create_room({ creator_id: 'ham', name: 'my room' })
+        room_res = @chatkit.create_room({ creator_id: user_id, name: 'my room' })
         expect(room_res[:status]).to eq 201
 
-        send_options = { room_id: room_res[:body][:id], sender_id: 'ham' }
+        send_options = { room_id: room_res[:body][:id], sender_id: user_id }
 
         send_message_res = @chatkit.send_message(send_options.merge(text: 'hi 1'))
         expect(send_message_res[:status]).to eq 201
@@ -890,11 +929,11 @@ describe Chatkit::Client do
         expect(get_messages_res_custom[:body].count).to eq 2
         expect(get_messages_res_custom[:body][0][:id]).to eq send_message_res_three[:body][:message_id]
         expect(get_messages_res_custom[:body][0][:text]).to eq 'hi 3'
-        expect(get_messages_res_custom[:body][0][:user_id]).to eq 'ham'
+        expect(get_messages_res_custom[:body][0][:user_id]).to eq user_id
         expect(get_messages_res_custom[:body][0][:room_id]).to eq room_res[:body][:id]
         expect(get_messages_res_custom[:body][1][:id]).to eq send_message_res_four[:body][:message_id]
         expect(get_messages_res_custom[:body][1][:text]).to eq 'hi 4'
-        expect(get_messages_res_custom[:body][1][:user_id]).to eq 'ham'
+        expect(get_messages_res_custom[:body][1][:user_id]).to eq user_id
         expect(get_messages_res_custom[:body][1][:room_id]).to eq room_res[:body][:id]
       end
     end
@@ -911,15 +950,16 @@ describe Chatkit::Client do
 
     describe "should return response payload if" do
       it "an id is provided" do
-        create_res = @chatkit.create_user({ id: 'ham', name: 'Ham' })
+        user_id = SecureRandom.uuid
+        create_res = @chatkit.create_user({ id: user_id, name: 'Ham' })
         expect(create_res[:status]).to eq 201
 
-        room_res = @chatkit.create_room({ creator_id: 'ham', name: 'my room' })
+        room_res = @chatkit.create_room({ creator_id: user_id, name: 'my room' })
         expect(room_res[:status]).to eq 201
 
         send_message_res = @chatkit.send_message({
           room_id: room_res[:body][:id],
-          sender_id: 'ham',
+          sender_id: user_id,
           text: 'hi 1'
         })
         expect(send_message_res[:status]).to eq 201
@@ -950,8 +990,9 @@ describe Chatkit::Client do
 
     describe "should return response payload if" do
       it "a name and permissions are provided" do
+        role_name = SecureRandom.uuid
         create_res = @chatkit.create_global_role({
-          name: 'admin',
+          name: role_name,
           permissions: ['room:create']
         })
         expect(create_res[:status]).to eq 201
@@ -977,8 +1018,9 @@ describe Chatkit::Client do
 
     describe "should return response payload if" do
       it "a name and permissions are provided" do
+        role_name = SecureRandom.uuid
         create_res = @chatkit.create_room_role({
-          name: 'admin',
+          name: role_name,
           permissions: ['room:update']
         })
         expect(create_res[:status]).to eq 201
@@ -998,14 +1040,15 @@ describe Chatkit::Client do
 
     describe "should return response payload if" do
       it "a name is provided" do
+        role_name = SecureRandom.uuid
         create_res = @chatkit.create_global_role({
-          name: 'admin',
+          name: role_name,
           permissions: ['room:create']
         })
         expect(create_res[:status]).to eq 201
 
         delete_res = @chatkit.delete_global_role({
-          name: 'admin'
+          name: role_name
         })
         expect(delete_res[:status]).to eq 204
         expect(delete_res[:body]).to be_nil
@@ -1024,14 +1067,15 @@ describe Chatkit::Client do
 
     describe "should return response payload if" do
       it "a name is provided" do
+        role_name = SecureRandom.uuid
         create_res = @chatkit.create_room_role({
-          name: 'admin',
+          name: role_name,
           permissions: ['room:update']
         })
         expect(create_res[:status]).to eq 201
 
         delete_res = @chatkit.delete_room_role({
-          name: 'admin'
+          name: role_name
         })
         expect(delete_res[:status]).to eq 204
         expect(delete_res[:body]).to be_nil
@@ -1056,18 +1100,20 @@ describe Chatkit::Client do
 
     describe "should return response payload if" do
       it "a user_id and name are provided" do
-        create_res = @chatkit.create_user({ id: 'ham', name: 'Ham' })
+        user_id = SecureRandom.uuid
+        role_name = SecureRandom.uuid
+        create_res = @chatkit.create_user({ id: user_id, name: 'Ham' })
         expect(create_res[:status]).to eq 201
 
         create_role_res = @chatkit.create_global_role({
-          name: 'admin',
+          name: role_name,
           permissions: ['room:create']
         })
         expect(create_role_res[:status]).to eq 201
 
         assign_role_res = @chatkit.assign_global_role_to_user({
-          user_id: 'ham',
-          name: 'admin'
+          user_id: user_id,
+          name: role_name
         })
         expect(assign_role_res[:status]).to eq 201
         expect(assign_role_res[:body]).to be_nil
@@ -1106,22 +1152,24 @@ describe Chatkit::Client do
     end
 
     describe "should return response payload if" do
+      user_id = SecureRandom.uuid
+      role_name = SecureRandom.uuid
       it "a user_id, name, and room_id are provided" do
-        create_res = @chatkit.create_user({ id: 'ham', name: 'Ham' })
+        create_res = @chatkit.create_user({ id: user_id, name: 'Ham' })
         expect(create_res[:status]).to eq 201
 
         create_role_res = @chatkit.create_room_role({
-          name: 'admin',
+          name: role_name,
           permissions: ['room:update']
         })
         expect(create_role_res[:status]).to eq 201
 
-        room_res = @chatkit.create_room({ creator_id: 'ham', name: 'my room' })
+        room_res = @chatkit.create_room({ creator_id: user_id, name: 'my room' })
         expect(room_res[:status]).to eq 201
 
         assign_role_res = @chatkit.assign_room_role_to_user({
-          user_id: 'ham',
-          name: 'admin',
+          user_id: user_id,
+          name: role_name,
           room_id: room_res[:body][:id]
         })
         expect(assign_role_res[:status]).to eq 201
@@ -1133,8 +1181,9 @@ describe Chatkit::Client do
   describe '#get_roles' do
     describe "should return response payload if" do
       it "no parameters are provided" do
+        role_name = SecureRandom.uuid
         create_role_res = @chatkit.create_room_role({
-          name: 'admin',
+          name: role_name,
           permissions: ['room:update']
         })
         expect(create_role_res[:status]).to eq 201
@@ -1143,7 +1192,7 @@ describe Chatkit::Client do
         expect(get_roles_res[:status]).to eq 200
         expect(get_roles_res[:body].count).to eq 1
         expect(get_roles_res[:body][0][:scope]).to eq 'room'
-        expect(get_roles_res[:body][0][:name]).to eq 'admin'
+        expect(get_roles_res[:body][0][:name]).to eq role_name
         expect(get_roles_res[:body][0][:permissions]).to eq ['room:update']
       end
     end
@@ -1160,26 +1209,28 @@ describe Chatkit::Client do
 
     describe "should return response payload if" do
       it "a user_id is provided" do
-        create_res = @chatkit.create_user({ id: 'ham', name: 'Ham' })
+        user_id = SecureRandom.uuid
+        role_name = SecureRandom.uuid
+        create_res = @chatkit.create_user({ id: user_id, name: 'Ham' })
         expect(create_res[:status]).to eq 201
 
         create_role_res = @chatkit.create_global_role({
-          name: 'admin',
+          name: role_name,
           permissions: ['room:update']
         })
         expect(create_role_res[:status]).to eq 201
 
         assign_role_res = @chatkit.assign_global_role_to_user({
-          user_id: 'ham',
-          name: 'admin'
+          user_id: user_id,
+          name: role_name
         })
         expect(assign_role_res[:status]).to eq 201
 
-        get_user_roles_res = @chatkit.get_user_roles({ user_id: 'ham' })
+        get_user_roles_res = @chatkit.get_user_roles({ user_id: user_id })
         expect(get_user_roles_res[:status]).to eq 200
         expect(get_user_roles_res[:body].count).to eq 1
         expect(get_user_roles_res[:body][0][:scope]).to eq 'global'
-        expect(get_user_roles_res[:body][0][:role_name]).to eq 'admin'
+        expect(get_user_roles_res[:body][0][:role_name]).to eq role_name
         expect(get_user_roles_res[:body][0][:permissions]).to eq ['room:update']
       end
     end
@@ -1196,24 +1247,26 @@ describe Chatkit::Client do
 
     describe "should return response payload if" do
       it "a user_id is provided" do
-        create_res = @chatkit.create_user({ id: 'ham', name: 'Ham' })
+        user_id = SecureRandom.uuid
+        role_name = SecureRandom.uuid
+        create_res = @chatkit.create_user({ id: user_id, name: 'Ham' })
         expect(create_res[:status]).to eq 201
 
         create_role_res = @chatkit.create_global_role({
-          name: 'admin',
+          name: role_name,
           permissions: ['room:create']
         })
         expect(create_role_res[:status]).to eq 201
 
         assign_role_res = @chatkit.assign_global_role_to_user({
-          user_id: 'ham',
-          name: 'admin'
+          user_id: user_id,
+          name: role_name
         })
         expect(assign_role_res[:status]).to eq 201
         expect(assign_role_res[:body]).to be_nil
 
         remove_role_res = @chatkit.remove_global_role_for_user({
-          user_id: 'ham'
+          user_id: user_id
         })
         expect(remove_role_res[:status]).to eq 204
         expect(remove_role_res[:body]).to be_nil
@@ -1238,27 +1291,29 @@ describe Chatkit::Client do
 
     describe "should return response payload if" do
       it "a user_id and room_id are provided" do
-        create_res = @chatkit.create_user({ id: 'ham', name: 'Ham' })
+        user_id = SecureRandom.uuid
+        role_name = SecureRandom.uuid
+        create_res = @chatkit.create_user({ id: user_id, name: 'Ham' })
         expect(create_res[:status]).to eq 201
 
         create_role_res = @chatkit.create_room_role({
-          name: 'admin',
+          name: role_name,
           permissions: ['room:update']
         })
         expect(create_role_res[:status]).to eq 201
 
-        room_res = @chatkit.create_room({ creator_id: 'ham', name: 'my room' })
+        room_res = @chatkit.create_room({ creator_id: user_id, name: 'my room' })
         expect(room_res[:status]).to eq 201
 
         assign_role_res = @chatkit.assign_room_role_to_user({
-          user_id: 'ham',
-          name: 'admin',
+          user_id: user_id,
+          name: role_name,
           room_id: room_res[:body][:id]
         })
         expect(assign_role_res[:status]).to eq 201
 
         remove_role_res = @chatkit.remove_room_role_for_user({
-          user_id: 'ham',
+          user_id: user_id,
           room_id: room_res[:body][:id]
         })
         expect(remove_role_res[:status]).to eq 204
@@ -1278,14 +1333,15 @@ describe Chatkit::Client do
 
     describe "should return response payload if" do
       it "a name is provided" do
+        role_name = SecureRandom.uuid
         create_role_res = @chatkit.create_global_role({
-          name: 'admin',
+          name: role_name,
           permissions: ['room:create']
         })
         expect(create_role_res[:status]).to eq 201
 
         get_role_perms_res = @chatkit.get_permissions_for_global_role({
-          name: 'admin'
+          name: role_name
         })
         expect(get_role_perms_res[:status]).to eq 200
         expect(get_role_perms_res[:body]).to eq ['room:create']
@@ -1304,14 +1360,15 @@ describe Chatkit::Client do
 
     describe "should return response payload if" do
       it "a name is provided" do
+        role_name = SecureRandom.uuid
         create_role_res = @chatkit.create_room_role({
-          name: 'admin',
+          name: role_name,
           permissions: ['room:update']
         })
         expect(create_role_res[:status]).to eq 201
 
         get_role_perms_res = @chatkit.get_permissions_for_room_role({
-          name: 'admin'
+          name: role_name
         })
         expect(get_role_perms_res[:status]).to eq 200
         expect(get_role_perms_res[:body]).to eq ['room:update']
@@ -1336,14 +1393,15 @@ describe Chatkit::Client do
 
     describe "should return response payload if" do
       it "a name is provided" do
+        role_name = SecureRandom.uuid
         create_role_res = @chatkit.create_global_role({
-          name: 'admin',
+          name: role_name,
           permissions: ['room:create']
         })
         expect(create_role_res[:status]).to eq 201
 
         update_perms_res = @chatkit.update_permissions_for_global_role({
-          name: 'admin',
+          name: role_name,
           permissions_to_add: ['room:delete'],
           permissions_to_remove: ['room:create']
         })
@@ -1351,7 +1409,7 @@ describe Chatkit::Client do
         expect(update_perms_res[:body]).to be_nil
 
         get_role_perms_res = @chatkit.get_permissions_for_global_role({
-          name: 'admin'
+          name: role_name
         })
         expect(get_role_perms_res[:status]).to eq 200
         expect(get_role_perms_res[:body]).to eq ['room:delete']
@@ -1376,14 +1434,15 @@ describe Chatkit::Client do
 
     describe "should return response payload if" do
       it "a name is provided" do
+        role_name = SecureRandom.uuid
         create_role_res = @chatkit.create_room_role({
-          name: 'admin',
+          name: role_name,
           permissions: ['room:update']
         })
         expect(create_role_res[:status]).to eq 201
 
         update_perms_res = @chatkit.update_permissions_for_room_role({
-          name: 'admin',
+          name: role_name,
           permissions_to_add: ['room:delete'],
           permissions_to_remove: ['room:update']
         })
@@ -1391,7 +1450,7 @@ describe Chatkit::Client do
         expect(update_perms_res[:body]).to be_nil
 
         get_role_perms_res = @chatkit.get_permissions_for_room_role({
-          name: 'admin'
+          name: role_name
         })
         expect(get_role_perms_res[:status]).to eq 200
         expect(get_role_perms_res[:body]).to eq ['room:delete']
@@ -1422,15 +1481,16 @@ describe Chatkit::Client do
 
     describe "should return response payload if" do
       it "a room_id, position, and user_id are provided" do
-        create_res = @chatkit.create_user({ id: 'ham', name: 'Ham' })
+        user_id = SecureRandom.uuid
+        create_res = @chatkit.create_user({ id: user_id, name: 'Ham' })
         expect(create_res[:status]).to eq 201
 
-        room_res = @chatkit.create_room({ creator_id: 'ham', name: 'my room' })
+        room_res = @chatkit.create_room({ creator_id: user_id, name: 'my room' })
         expect(room_res[:status]).to eq 201
 
         set_cursor_res = @chatkit.set_read_cursor({
           room_id: room_res[:body][:id],
-          user_id: 'ham',
+          user_id: user_id,
           position: 123
         })
         expect(set_cursor_res[:status]).to eq 201
@@ -1456,29 +1516,30 @@ describe Chatkit::Client do
 
     describe "should return response payload if" do
       it "a room_id and user_id are provided" do
-        create_res = @chatkit.create_user({ id: 'ham', name: 'Ham' })
+        user_id = SecureRandom.uuid
+        create_res = @chatkit.create_user({ id: user_id, name: 'Ham' })
         expect(create_res[:status]).to eq 201
 
-        room_res = @chatkit.create_room({ creator_id: 'ham', name: 'my room' })
+        room_res = @chatkit.create_room({ creator_id: user_id, name: 'my room' })
         expect(room_res[:status]).to eq 201
 
         set_cursor_res = @chatkit.set_read_cursor({
           room_id: room_res[:body][:id],
-          user_id: 'ham',
+          user_id: user_id,
           position: 123
         })
         expect(set_cursor_res[:status]).to eq 201
 
         get_cursor_res = @chatkit.get_read_cursor({
           room_id: room_res[:body][:id],
-          user_id: 'ham'
+          user_id: user_id
         })
         expect(get_cursor_res[:status]).to eq 200
         expect(get_cursor_res[:body]).to have_key :updated_at
         expect(get_cursor_res[:body][:cursor_type]).to eq 0
         expect(get_cursor_res[:body][:position]).to eq 123
         expect(get_cursor_res[:body][:room_id]).to eq room_res[:body][:id]
-        expect(get_cursor_res[:body][:user_id]).to eq 'ham'
+        expect(get_cursor_res[:body][:user_id]).to eq user_id
       end
     end
   end
@@ -1494,21 +1555,22 @@ describe Chatkit::Client do
 
     describe "should return response payload if" do
       it "a user_id is provided" do
-        create_res = @chatkit.create_user({ id: 'ham', name: 'Ham' })
+        user_id = SecureRandom.uuid
+        create_res = @chatkit.create_user({ id: user_id, name: 'Ham' })
         expect(create_res[:status]).to eq 201
 
-        room_res = @chatkit.create_room({ creator_id: 'ham', name: 'my room' })
+        room_res = @chatkit.create_room({ creator_id: user_id, name: 'my room' })
         expect(room_res[:status]).to eq 201
 
         set_cursor_res = @chatkit.set_read_cursor({
           room_id: room_res[:body][:id],
-          user_id: 'ham',
+          user_id: user_id,
           position: 123
         })
         expect(set_cursor_res[:status]).to eq 201
 
         get_cursors_res = @chatkit.get_user_read_cursors({
-          user_id: 'ham'
+          user_id: user_id
         })
         expect(get_cursors_res[:status]).to eq 200
         expect(get_cursors_res[:body].count).to eq 1
@@ -1516,7 +1578,7 @@ describe Chatkit::Client do
         expect(get_cursors_res[:body][0][:cursor_type]).to eq 0
         expect(get_cursors_res[:body][0][:position]).to eq 123
         expect(get_cursors_res[:body][0][:room_id]).to eq room_res[:body][:id]
-        expect(get_cursors_res[:body][0][:user_id]).to eq 'ham'
+        expect(get_cursors_res[:body][0][:user_id]).to eq user_id
       end
     end
   end
@@ -1532,15 +1594,16 @@ describe Chatkit::Client do
 
     describe "should return response payload if" do
       it "a room_id is provided" do
-        create_res = @chatkit.create_user({ id: 'ham', name: 'Ham' })
+        user_id = SecureRandom.uuid
+        create_res = @chatkit.create_user({ id: user_id, name: 'Ham' })
         expect(create_res[:status]).to eq 201
 
-        room_res = @chatkit.create_room({ creator_id: 'ham', name: 'my room' })
+        room_res = @chatkit.create_room({ creator_id: user_id, name: 'my room' })
         expect(room_res[:status]).to eq 201
 
         set_cursor_res = @chatkit.set_read_cursor({
           room_id: room_res[:body][:id],
-          user_id: 'ham',
+          user_id: user_id,
           position: 123
         })
         expect(set_cursor_res[:status]).to eq 201
@@ -1554,7 +1617,7 @@ describe Chatkit::Client do
         expect(get_cursors_res[:body][0][:cursor_type]).to eq 0
         expect(get_cursors_res[:body][0][:position]).to eq 123
         expect(get_cursors_res[:body][0][:room_id]).to eq room_res[:body][:id]
-        expect(get_cursors_res[:body][0][:user_id]).to eq 'ham'
+        expect(get_cursors_res[:body][0][:user_id]).to eq user_id
       end
     end
   end
