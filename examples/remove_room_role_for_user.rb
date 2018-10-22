@@ -7,5 +7,5 @@ chatkit = Chatkit::Client.new({
 
 p chatkit.remove_room_role_for_user({
   user_id: "ham",
-  room_id: 123
+  room_id: "123"
 })

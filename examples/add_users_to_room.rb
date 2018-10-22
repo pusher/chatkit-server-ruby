@@ -6,6 +6,6 @@ chatkit = Chatkit::Client.new({
 })
 
 p chatkit.add_users_to_room({
-  room_id: 123,
+  room_id: "123",
   user_ids: ['ham', 'sarah']
 })

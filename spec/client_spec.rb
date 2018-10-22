@@ -657,7 +657,7 @@ describe Chatkit::Client do
 
       it "no user_ids are provided" do
         expect {
-          @chatkit.add_users_to_room({ room_id: 123 })
+          @chatkit.add_users_to_room({ room_id: "123" })
         }.to raise_error Chatkit::MissingParameterError
       end
     end
@@ -706,7 +706,7 @@ describe Chatkit::Client do
 
       it "no user_ids are provided" do
         expect {
-          @chatkit.remove_users_from_room({ room_id: 123 })
+          @chatkit.remove_users_from_room({ room_id: "123" })
         }.to raise_error Chatkit::MissingParameterError
       end
     end
@@ -762,13 +762,13 @@ describe Chatkit::Client do
 
       it "no sender_id is provided" do
         expect {
-          @chatkit.send_message({ text: 'hi', room_id: 123 })
+          @chatkit.send_message({ text: 'hi', room_id: "123" })
         }.to raise_error Chatkit::MissingParameterError
       end
 
       it "no text is provided" do
         expect {
-          @chatkit.send_message({ sender_id: 'ham', room_id: 123 })
+          @chatkit.send_message({ sender_id: 'ham', room_id: "123" })
         }.to raise_error Chatkit::MissingParameterError
       end
 
@@ -776,7 +776,7 @@ describe Chatkit::Client do
         expect {
           @chatkit.send_message({
             sender_id: 'ham',
-            room_id: 123,
+            room_id: "123",
             text: 'test',
             attachment: {
               type: 'image'
@@ -789,7 +789,7 @@ describe Chatkit::Client do
         expect {
           @chatkit.send_message({
             sender_id: 'ham',
-            room_id: 123,
+            room_id: "123",
             text: 'test',
             attachment: {
               resource_link: 'https://placekitten.com/200/300'
@@ -802,7 +802,7 @@ describe Chatkit::Client do
         expect {
           @chatkit.send_message({
             sender_id: 'ham',
-            room_id: 123,
+            room_id: "123",
             text: 'test',
             attachment: {
               resource_link: 'https://placekitten.com/200/300',
@@ -1127,7 +1127,7 @@ describe Chatkit::Client do
         expect {
           @chatkit.assign_room_role_to_user({
             name: 'admin',
-            room_id: 123
+            room_id: "123"
           })
         }.to raise_error Chatkit::MissingParameterError
       end
@@ -1136,7 +1136,7 @@ describe Chatkit::Client do
         expect {
           @chatkit.assign_room_role_to_user({
             user_id: 'ham',
-            room_id: 123
+            room_id: "123"
           })
         }.to raise_error Chatkit::MissingParameterError
       end
@@ -1278,7 +1278,7 @@ describe Chatkit::Client do
     describe "should raise a MissingParameterError if" do
       it "no user_id is provided" do
         expect {
-          @chatkit.remove_room_role_for_user({ room_id: 123 })
+          @chatkit.remove_room_role_for_user({ room_id: "123" })
         }.to raise_error Chatkit::MissingParameterError
       end
 
@@ -1468,13 +1468,13 @@ describe Chatkit::Client do
 
       it "no user_id is provided" do
         expect {
-          @chatkit.set_read_cursor({ room_id: 123, position: 123 })
+          @chatkit.set_read_cursor({ room_id: "123", position: 123 })
         }.to raise_error Chatkit::MissingParameterError
       end
 
       it "no position is provided" do
         expect {
-          @chatkit.set_read_cursor({ room_id: 123, user_id: 'ham' })
+          @chatkit.set_read_cursor({ room_id: "123", user_id: 'ham' })
         }.to raise_error Chatkit::MissingParameterError
       end
     end
@@ -1509,7 +1509,7 @@ describe Chatkit::Client do
 
       it "no user_id is provided" do
         expect {
-          @chatkit.get_read_cursor({ room_id: 123 })
+          @chatkit.get_read_cursor({ room_id: "123" })
         }.to raise_error Chatkit::MissingParameterError
       end
     end
