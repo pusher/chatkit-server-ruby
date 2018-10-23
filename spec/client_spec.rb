@@ -252,11 +252,16 @@ describe Chatkit::Client do
         })
         expect(res[:status]).to eq 201
 
-        get_users_res = @chatkit.get_users({ limit: 1 })
+        get_users_res = @chatkit.get_users({ limit: 2 })
         expect(get_users_res[:status]).to eq 200
-        expect(get_users_res[:body].count).to eq 1
-        expect(get_users_res[:body][0][:id]).to eq user_id2
-        expect(get_users_res[:body][0][:name]).to eq 'Ham2'
+        expect(get_users_res[:body].count).to eq 2
+
+        users_sorted = get_users_res[:body].sort { |a, b| a[:name] <=> b[:name] }
+
+        expect(users_sorted[0][:name]).to eq 'Ham'
+        expect(users_sorted[0][:id]).to eq user_id
+        expect(users_sorted[1][:name]).to eq 'Ham2'
+        expect(users_sorted[1][:id]).to eq user_id2
       end
 
       it "from_timestamp is provided" do
