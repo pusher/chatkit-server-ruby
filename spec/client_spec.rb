@@ -220,6 +220,18 @@ describe Chatkit::Client do
         expect(create_res[:body][:id]).to eq user_id
         expect(create_res[:body][:name]).to eq 'Ham'
       end
+
+      it "the user id is weird" do
+        user_id = "🍓🍓🍓"
+        create_res = @chatkit.create_user({ id: user_id, name: 'Ham' })
+        expect(create_res[:status]).to eq 201
+
+        update_res = @chatkit.get_user({ id: user_id })
+        expect(update_res[:status]).to eq 200
+        expect(create_res[:body][:id]).to eq user_id
+        expect(create_res[:body][:name]).to eq 'Ham'
+      end
+
     end
   end
 
