@@ -277,23 +277,18 @@ describe Chatkit::Client do
       end
 
       it "from_timestamp is provided" do
-        start_timestamp = Time.now.iso8601
         user_id = SecureRandom.uuid
         user_id2 = SecureRandom.uuid
-
-        sleep 1
 
         create_res = @chatkit.create_user({ id: user_id, name: 'Ham' })
         expect(create_res[:status]).to eq 201
 
         sleep 2
 
-        before_second_user_timestamp = Time.now.iso8601
-
         create_res_two = @chatkit.create_user({ id: user_id2, name: 'Ham2' })
         expect(create_res_two[:status]).to eq 201
 
-        get_users_res = @chatkit.get_users({ from_timestamp: start_timestamp })
+        get_users_res = @chatkit.get_users({ from_timestamp: create_res[:body][:created_at] })
 
         expect(get_users_res[:status]).to eq 200
         expect(get_users_res[:body].count).to eq 2
@@ -302,7 +297,7 @@ describe Chatkit::Client do
         expect(get_users_res[:body][1][:id]).to eq user_id2
         expect(get_users_res[:body][1][:name]).to eq 'Ham2'
 
-        get_users_res_two = @chatkit.get_users({ from_timestamp: before_second_user_timestamp })
+        get_users_res_two = @chatkit.get_users({ from_timestamp: create_res_two[:body][:created_at] })
         expect(get_users_res_two[:status]).to eq 200
         expect(get_users_res_two[:body].count).to eq 1
         expect(get_users_res_two[:body][0][:id]).to eq user_id2
