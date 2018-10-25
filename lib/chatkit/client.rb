@@ -1,5 +1,6 @@
 require 'pusher-platform'
 require 'json'
+require 'cgi'
 
 require_relative './error'
 require_relative './missing_parameter_error'
@@ -43,7 +44,7 @@ module Chatkit
       @cursors_instance = PusherPlatform::Instance.new(
         base_options.merge({
           service_name: 'chatkit_cursors',
-          service_version: 'v1'
+          service_version: 'v2'
         })
       )
     end
@@ -125,7 +126,7 @@ module Chatkit
 
       api_request({
         method: "PUT",
-        path: "/users/#{options[:id]}",
+        path: "/users/#{CGI::escape options[:id]}",
         body: payload,
         jwt: generate_su_token({ user_id: options[:id] })[:token]
       })
@@ -138,7 +139,7 @@ module Chatkit
 
       api_request({
         method: "DELETE",
-        path: "/users/#{options[:id]}",
+        path: "/users/#{CGI::escape options[:id]}",
         jwt: generate_su_token[:token]
       })
     end
@@ -150,7 +151,7 @@ module Chatkit
 
       api_request({
         method: "GET",
-        path: "/users/#{options[:id]}",
+        path: "/users/#{CGI::escape options[:id]}",
         jwt: generate_su_token[:token]
       })
     end
@@ -229,7 +230,7 @@ module Chatkit
 
       api_request({
         method: "PUT",
-        path: "/rooms/#{options[:id]}",
+        path: "/rooms/#{CGI::escape options[:id]}",
         body: payload,
         jwt: generate_su_token[:token]
       })
@@ -242,7 +243,7 @@ module Chatkit
 
       api_request({
         method: "DELETE",
-        path: "/rooms/#{options[:id]}",
+        path: "/rooms/#{CGI::escape options[:id]}",
         jwt: generate_su_token[:token]
       })
     end
@@ -254,7 +255,7 @@ module Chatkit
 
       api_request({
         method: "GET",
-        path: "/rooms/#{options[:id]}",
+        path: "/rooms/#{CGI::escape options[:id]}",
         jwt: generate_su_token[:token]
       })
     end
@@ -299,7 +300,7 @@ module Chatkit
 
       api_request({
         method: "PUT",
-        path: "/rooms/#{options[:room_id]}/users/add",
+        path: "/rooms/#{CGI::escape options[:room_id]}/users/add",
         body: { user_ids: options[:user_ids] },
         jwt: generate_su_token[:token]
       })
@@ -316,7 +317,7 @@ module Chatkit
 
       api_request({
         method: "PUT",
-        path: "/rooms/#{options[:room_id]}/users/remove",
+        path: "/rooms/#{CGI::escape options[:room_id]}/users/remove",
         body: { user_ids: options[:user_ids] },
         jwt: generate_su_token[:token]
       })
@@ -336,7 +337,7 @@ module Chatkit
 
       api_request({
         method: "GET",
-        path: "/rooms/#{options[:room_id]}/messages",
+        path: "/rooms/#{CGI::escape options[:room_id]}/messages",
         query: query_params,
         jwt: generate_su_token[:token]
       })
@@ -378,7 +379,7 @@ module Chatkit
 
       api_request({
         method: "POST",
-        path: "/rooms/#{options[:room_id]}/messages",
+        path: "/rooms/#{CGI::escape options[:room_id]}/messages",
         body: payload,
         jwt: generate_su_token({ user_id: options[:sender_id] })[:token]
       })
@@ -445,7 +446,7 @@ module Chatkit
 
       authorizer_request({
         method: "GET",
-        path: "/users/#{options[:user_id]}/roles",
+        path: "/users/#{CGI::escape options[:user_id]}/roles",
         jwt: generate_su_token[:token]
       })
     end
@@ -495,7 +496,7 @@ module Chatkit
 
       cursors_request({
         method: "GET",
-        path: "/cursors/0/rooms/#{options[:room_id]}/users/#{options[:user_id]}",
+        path: "/cursors/0/rooms/#{CGI::escape options[:room_id]}/users/#{CGI::escape options[:user_id]}",
         jwt: generate_su_token[:token]
       })
     end
@@ -515,7 +516,7 @@ module Chatkit
 
       cursors_request({
         method: "PUT",
-        path: "/cursors/0/rooms/#{options[:room_id]}/users/#{options[:user_id]}",
+        path: "/cursors/0/rooms/#{CGI::escape options[:room_id]}/users/#{CGI::escape options[:user_id]}",
         body: { position: options[:position] },
         jwt: generate_su_token[:token]
       })
@@ -528,7 +529,7 @@ module Chatkit
 
       cursors_request({
         method: "GET",
-        path: "/cursors/0/users/#{options[:user_id]}",
+        path: "/cursors/0/users/#{CGI::escape options[:user_id]}",
         jwt: generate_su_token[:token]
       })
     end
@@ -540,7 +541,7 @@ module Chatkit
 
       cursors_request({
         method: "GET",
-        path: "/cursors/0/rooms/#{options[:room_id]}",
+        path: "/cursors/0/rooms/#{CGI::escape options[:room_id]}",
         jwt: generate_su_token[:token]
       })
     end
@@ -589,7 +590,7 @@ module Chatkit
 
       request_options = {
         method: "GET",
-        path: "/users/#{options[:id]}/rooms",
+        path: "/users/#{CGI::escape options[:id]}/rooms",
         jwt: generate_su_token[:token]
       }
 
@@ -628,7 +629,7 @@ module Chatkit
 
       authorizer_request({
         method: "DELETE",
-        path: "/roles/#{options[:name]}/scope/#{options[:scope]}",
+        path: "/roles/#{CGI::escape options[:name]}/scope/#{options[:scope]}",
         jwt: generate_su_token[:token]
       })
     end
@@ -650,7 +651,7 @@ module Chatkit
 
       authorizer_request({
         method: "PUT",
-        path: "/users/#{options[:user_id]}/roles",
+        path: "/users/#{CGI::escape options[:user_id]}/roles",
         body: body,
         jwt: generate_su_token[:token]
       })
@@ -663,7 +664,7 @@ module Chatkit
 
       request_options = {
         method: "DELETE",
-        path: "/users/#{options[:user_id]}/roles",
+        path: "/users/#{CGI::escape options[:user_id]}/roles",
         jwt: generate_su_token[:token]
       }
 
@@ -681,7 +682,7 @@ module Chatkit
 
       authorizer_request({
         method: "GET",
-        path: "/roles/#{options[:name]}/scope/#{options[:scope]}/permissions",
+        path: "/roles/#{CGI::escape options[:name]}/scope/#{options[:scope]}/permissions",
         jwt: generate_su_token[:token]
       })
     end
@@ -704,7 +705,7 @@ module Chatkit
 
       authorizer_request({
         method: "PUT",
-        path: "/roles/#{options[:name]}/scope/#{options[:scope]}/permissions",
+        path: "/roles/#{CGI::escape options[:name]}/scope/#{options[:scope]}/permissions",
         body: body,
         jwt: generate_su_token[:token]
       })

@@ -6,8 +6,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased](https://github.com/pusher/chatkit-server-ruby/compare/0.7.2...HEAD)
 
+
 ### Changes
 
+- *Breaking* Room IDs are now strings throughout.
 - *Breaking:* All functions now take a single hash as their sole parameter
 - *Breaking:* `get_users_by_ids` has been renamed to `get_users_by_id`
 - *Breaking:* `generate_su_token` now returns a hash with the keys `token` and `expires_in`, to match the return value of `generate_access_token`

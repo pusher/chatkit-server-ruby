@@ -6,7 +6,7 @@ chatkit = Chatkit::Client.new({
 })
 
 p chatkit.send_message({
-  room_id: 123,
+  room_id: "123",
   text: "A message",
   sender_id: "ham"
 })

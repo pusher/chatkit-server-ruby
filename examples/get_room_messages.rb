@@ -6,6 +6,6 @@ chatkit = Chatkit::Client.new({
 })
 
 p chatkit.get_room_messages({
-  room_id: 123,
+  room_id: "123",
   limit: 5
 })

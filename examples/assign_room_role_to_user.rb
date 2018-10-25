@@ -8,5 +8,5 @@ chatkit = Chatkit::Client.new({
 p chatkit.assign_room_role_to_user({
   name: "admin",
   user_id: "ham",
-  room_id: 123
+  room_id: "123"
 })
