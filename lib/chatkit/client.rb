@@ -37,7 +37,7 @@ module Chatkit
       @authorizer_instance = PusherPlatform::Instance.new(
         base_options.merge({
           service_name: 'chatkit_authorizer',
-          service_version: 'v1'
+          service_version: 'v2'
         })
       )
 
