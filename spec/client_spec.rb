@@ -989,7 +989,7 @@ describe Chatkit::Client do
     describe "should raise a MissingParameterError if" do
       it "no name is provided" do
         expect {
-          @chatkit.create_global_role({ permissions: 'room:create' })
+          @chatkit.create_global_role({ permissions: ['room:create'] })
         }.to raise_error Chatkit::MissingParameterError
       end
 
@@ -1017,7 +1017,7 @@ describe Chatkit::Client do
     describe "should raise a MissingParameterError if" do
       it "no name is provided" do
         expect {
-          @chatkit.create_room_role({ permissions: 'room:update' })
+          @chatkit.create_room_role({ permissions: ['room:update'] })
         }.to raise_error Chatkit::MissingParameterError
       end
 
