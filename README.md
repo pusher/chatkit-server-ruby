@@ -1,5 +1,9 @@
 # chatkit-server-ruby
 
+[![Twitter](https://img.shields.io/badge/twitter-@Pusher-blue.svg?style=flat)](http://twitter.com/Pusher)
+[![GitHub license](https://img.shields.io/badge/license-MIT-lightgrey.svg)](https://github.com/pusher/chatkit-server-ruby/blob/master/LICENSE.md)
+[![Gem Version](https://badge.fury.io/rb/pusher-chatkit-server.svg)](https://badge.fury.io/rb/pusher-chatkit-server)
+
 Ruby server SDK for Pusher Chatkit.
 
 ## Installation
