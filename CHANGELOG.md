@@ -4,16 +4,19 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
-## [Unreleased](https://github.com/pusher/chatkit-server-ruby/compare/0.7.2...HEAD)
+## [Unreleased](https://github.com/pusher/chatkit-server-ruby/compare/1.0.0...HEAD)
 
+## [1.0.0](https://github.com/pusher/chatkit-server-ruby/compare/0.7.2...1.0.0) - 2018-10-30
 
 ### Changes
 
-- *Breaking* Room IDs are now strings throughout.
-- *Breaking:* All functions now take a single hash as their sole parameter
-- *Breaking:* `get_users_by_ids` has been renamed to `get_users_by_id`
-- *Breaking:* `generate_su_token` now returns a hash with the keys `token` and `expires_in`, to match the return value of `generate_access_token`
-- *Breaking*: All functions that interact with the API (i.e. everything but authentication methods) either raise a `PusherPlatform::ErrorResponse` or return a hash of the form:
+#### Breaking
+
+- Room IDs are now strings throughout.
+- All functions now take a single hash as their sole parameter
+- `get_users_by_ids` has been renamed to `get_users_by_id`
+- `generate_su_token` now returns a hash with the keys `token` and `expires_in`, to match the return value of `generate_access_token`
+- All functions that interact with the API (i.e. everything but authentication methods) either raise a `PusherPlatform::ErrorResponse` or return a hash of the form:
 
 ```ruby
 {
@@ -27,7 +30,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 }
 ```
 
-- Bump pusher-platform dependency to 0.11.1
+#### Non-breaking
+
+- Bump pusher-platform dependency to 0.11.2
 - Unified all errors under a `Chatkit::Error` type
 
 ### Additions
