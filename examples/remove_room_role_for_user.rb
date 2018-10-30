@@ -5,4 +5,7 @@ chatkit = Chatkit::Client.new({
   key: "the-id-bit:the-secret-bit"
 })
 
-p chatkit.remove_room_role_for_user("mcflurry", 123)
+p chatkit.remove_room_role_for_user({
+  user_id: "ham",
+  room_id: "123"
+})

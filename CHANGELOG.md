@@ -6,6 +6,63 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased](https://github.com/pusher/chatkit-server-ruby/compare/0.7.2...HEAD)
 
+
+### Changes
+
+- *Breaking* Room IDs are now strings throughout.
+- *Breaking:* All functions now take a single hash as their sole parameter
+- *Breaking:* `get_users_by_ids` has been renamed to `get_users_by_id`
+- *Breaking:* `generate_su_token` now returns a hash with the keys `token` and `expires_in`, to match the return value of `generate_access_token`
+- *Breaking*: All functions that interact with the API (i.e. everything but authentication methods) either raise a `PusherPlatform::ErrorResponse` or return a hash of the form:
+
+```ruby
+{
+  status: 200
+  headers: {
+    ...
+  },
+  body: {
+    ...
+  }
+}
+```
+
+- Bump pusher-platform dependency to 0.11.1
+- Unified all errors under a `Chatkit::Error` type
+
+### Additions
+
+- Added the following functionality:
+    - `create_room`
+    - `update_room`
+    - `delete_room`
+    - `get_user_rooms`
+    - `get_user_joinable_rooms`
+    - `add_users_to_room`
+    - `remove_users_from_room`
+    - `get_user`
+    - `update_user`
+    - `create_users`
+    - `send_message`
+    - `delete_message`
+    - `update_permissions_for_global_role`
+    - `update_permissions_for_room_role`
+    - `get_read_cursor`
+    - `set_read_cursor`
+    - `get_user_read_cursors`
+    - `get_room_read_cursors`
+
+- `get_rooms` supports the `include_private` option
+
+### Removals
+
+- Removed `update_permissions_for_role` (replaced by `update_permissions_for_global_role` and `update_permissions_for_room_role`)
+- `authenticate_with_request` has been removed as we believe `authenticate` provides an easier to use API
+
+### Fixes
+
+- `get_rooms` now properly paginates using the `from_ts` value provided
+
 ## [0.7.2](https://github.com/pusher/chatkit-server-ruby/compare/0.7.1...0.7.2) - 2018-07-20
 
 ### Changes

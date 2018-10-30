@@ -5,4 +5,7 @@ chatkit = Chatkit::Client.new({
   key: "the-id-bit:the-secret-bit"
 })
 
-p chatkit.assign_global_role_to_user("mcflurry", "mcflurry")
+p chatkit.assign_global_role_to_user({
+  name: "admin",
+  user_id: "ham"
+})
