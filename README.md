@@ -12,6 +12,13 @@ Ruby server SDK for Pusher Chatkit.
 $ gem install pusher-chatkit-server
 ```
 
+## Deprecated versions
+
+Versions of the library below [1.0.0](https://github.com/pusher/chatkit-server-ruby/releases/tag/v1.0.0) are deprecated and support for them will soon be dropped.
+
+It is highly recommended that you upgrade to the latest version if you're on an older version. To view a list of changes,
+please refer to the [CHANGELOG](CHANGELOG.md).
+
 ## Examples
 
 Refer to the `examples` directory. It contains several examples demonstrating all the methods.
