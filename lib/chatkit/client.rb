@@ -206,6 +206,8 @@ module Chatkit
         name: options[:name],
         private: options[:private] || false
       }
+      
+      body[:custom_data] = options[:custom_data] unless options[:custom_data].nil?
 
       unless options[:user_ids].nil?
         body[:user_ids] = options[:user_ids]
@@ -227,6 +229,7 @@ module Chatkit
       payload = {}
       payload[:name] = options[:name] unless options[:name].nil?
       payload[:private] = options[:private] unless options[:private].nil?
+      payload[:custom_data] = options[:custom_data] unless options[:custom_data].nil?
 
       api_request({
         method: "PUT",

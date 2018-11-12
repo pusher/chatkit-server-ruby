@@ -385,6 +385,22 @@ describe Chatkit::Client do
         expect(room_res[:body][:private]).to be true
         expect(room_res[:body][:member_user_ids] - [user_id, user_id2]).to be_empty
       end
+
+      it "a creator_id, name and custom_data are provided" do
+      	user_id = SecureRandom.uuid
+        res = @chatkit.create_user({ id: user_id, name: 'Ham' })
+        expect(res[:status]).to eq 201
+
+        room_res = @chatkit.create_room({
+          creator_id: user_id,
+          name: 'my room',
+          custom_data: { foo: 'bar' }
+        })
+        expect(room_res[:status]).to eq 201
+        expect(room_res[:body]).to have_key :id
+        expect(room_res[:body][:name]).to eq 'my room'
+        expect(room_res[:body][:custom_data][:foo]).to eq 'bar'
+      end
     end
   end
 
@@ -406,17 +422,27 @@ describe Chatkit::Client do
         room_res = @chatkit.create_room({
           creator_id: user_id,
           name: 'my room',
-          private: true
+          private: true,
+          custom_data: { foo: 'bar', id: 1 }
         })
         expect(room_res[:status]).to eq 201
 
         update_res = @chatkit.update_room({
           id: room_res[:body][:id],
           name: 'New room name',
-          private: false
+          private: false,
+          custom_data: { foo: 'baz', id: 2 }
         })
         expect(update_res[:status]).to eq 204
         expect(update_res[:body]).to be_nil
+
+        get_room_res = @chatkit.get_room({ id: room_res[:body][:id] })
+        expect(get_room_res[:status]).to eq 200
+        expect(get_room_res[:body][:id]).to eq room_res[:body][:id]
+        expect(get_room_res[:body][:name]).to eq 'New room name'
+        expect(get_room_res[:body][:private]).to eq false
+        expect(get_room_res[:body][:custom_data][:foo]).to eq 'baz'
+        expect(get_room_res[:body][:custom_data][:id]).to eq 2
       end
     end
   end
