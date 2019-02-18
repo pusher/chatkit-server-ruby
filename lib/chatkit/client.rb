@@ -12,7 +12,10 @@ module Chatkit
   GLOBAL_SCOPE = "global"
 
   class Client
-    attr_accessor :api_instance, :authorizer_instance, :cursors_instance
+    attr_accessor :api_instance,
+                  :api_v2_instance,
+                  :authorizer_instance,
+                  :cursors_instance
 
     def initialize(options)
       base_options = {
@@ -27,10 +30,17 @@ module Chatkit
         })
       }
 
-      @api_instance = PusherPlatform::Instance.new(
+      @api_v2_instance = PusherPlatform::Instance.new(
         base_options.merge({
           service_name: 'chatkit',
           service_version: 'v2'
+        })
+      )
+
+      @api_instance = PusherPlatform::Instance.new(
+        base_options.merge({
+          service_name: 'chatkit',
+          service_version: 'v3'
         })
       )
 
@@ -338,7 +348,7 @@ module Chatkit
       query_params[:direction] = options[:direction] unless options[:direction].nil?
       query_params[:limit] = options[:limit] unless options[:limit].nil?
 
-      api_request({
+      api_v2_request({
         method: "GET",
         path: "/rooms/#{CGI::escape options[:room_id]}/messages",
         query: query_params,
@@ -380,7 +390,7 @@ module Chatkit
         attachment: options[:attachment]
       }
 
-      api_request({
+      api_v2_request({
         method: "POST",
         path: "/rooms/#{CGI::escape options[:room_id]}/messages",
         body: payload,
@@ -550,6 +560,10 @@ module Chatkit
     end
 
     # Service-specific helpers
+
+    def api_v2_request(options)
+      make_request(@api_v2_instance, options)
+    end
 
     def api_request(options)
       make_request(@api_instance, options)
