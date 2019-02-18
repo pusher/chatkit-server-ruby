@@ -727,5 +727,20 @@ module Chatkit
         jwt: generate_su_token[:token]
       })
     end
+
+    def verify(rules, options)
+      rules.keys.each { |field_name|
+        rule = rules[field_name]
+        if options.has_key?(field_name)
+          if not (options[field_name].instance_of? rule[:type])
+            raise Chatkit::ParameterTypeError.new("Field " + field_name + " must have type " + rule[:type])
+          end
+        else
+          if not rule.has_key? :optional
+            raise Chatkit::MissingParameterError.new(rule[:message])
+          end
+        end
+      }
+    end
   end
 end
