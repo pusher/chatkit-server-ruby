@@ -1,3 +1,4 @@
+# coding: utf-8
 require 'spec_helper'
 require 'time'
 require 'securerandom'
@@ -885,6 +886,123 @@ describe Chatkit::Client do
             resource_link: 'https://placekitten.com/200/300',
             type: 'image'
           }
+        })
+        expect(send_message_res[:status]).to eq 201
+        expect(send_message_res[:body]).to have_key :message_id
+      end
+    end
+  end
+
+  describe '#send_simple_message' do
+    describe "should raise a MissingParameterError if" do
+      it "no room_id is provided" do
+        expect {
+          @chatkit.send_simple_message({ text: 'hi', sender_id: 'ham' })
+        }.to raise_error Chatkit::MissingParameterError
+      end
+
+      it "no sender_id is provided" do
+        expect {
+          @chatkit.send_simple_message({ text: 'hi', room_id: "123" })
+        }.to raise_error Chatkit::MissingParameterError
+      end
+
+      it "no text is provided" do
+        expect {
+          @chatkit.send_simple_message({ sender_id: 'ham', room_id: "123" })
+        }.to raise_error Chatkit::MissingParameterError
+      end
+    end
+
+    describe "should return response payload if" do
+      it "a room_id, sender_id, and text are provided" do
+        user_id = SecureRandom.uuid
+        create_res = @chatkit.create_user({ id: user_id, name: 'Ham' })
+        expect(create_res[:status]).to eq 201
+
+        room_res = @chatkit.create_room({ creator_id: user_id, name: 'my room' })
+        expect(room_res[:status]).to eq 201
+
+        send_message_res = @chatkit.send_simple_message({
+          room_id: room_res[:body][:id],
+          sender_id: user_id,
+          text: 'hi 1'
+        })
+        expect(send_message_res[:status]).to eq 201
+        expect(send_message_res[:body]).to have_key :message_id
+      end
+    end
+  end
+
+
+  describe '#send_multipart_message' do
+    good_parts = [{type: "text/plain", content: "hi"},
+                  {type: "image/png", url: "https://placekitten.com/200/300"}
+                 ]
+
+    describe "should raise a MissingParameterError if" do
+      it "no room_id is provided" do
+        expect {
+          @chatkit.send_multipart_message({ sender_id: 'ham', parts:  good_parts})
+        }.to raise_error Chatkit::MissingParameterError
+      end
+
+      it "no sender_id is provided" do
+        expect {
+          @chatkit.send_multipart_message({ room_id: "123", parts: good_parts })
+        }.to raise_error Chatkit::MissingParameterError
+      end
+
+      it "no parts are provided" do
+        expect {
+          @chatkit.send_multipart_message({ sender_id: 'ham', room_id: "123" })
+        }.to raise_error Chatkit::MissingParameterError
+      end
+
+      it "no type is provided for a part" do
+        expect {
+          @chatkit.send_multipart_message(
+            {sender_id: 'ham',
+             room_id: "123",
+             parts: [{ content: 'test' }]
+            })
+        }.to raise_error Chatkit::MissingParameterError
+      end
+
+      it "only type is provided for a part" do
+        expect {
+          @chatkit.send_multipart_message(
+            {sender_id: 'ham',
+             room_id: "123",
+             parts: [{ type: 'text/plain' }]
+            })
+        }.to raise_error Chatkit::MissingParameterError
+      end
+
+      it "wrong type is provided for a string parameter" do
+        expect {
+          @chatkit.send_multipart_message(
+            {sender_id: 'ham',
+             room_id: 123,
+             parts: good_parts
+            })
+        }.to raise_error Chatkit::ParameterTypeError
+      end
+    end
+
+    describe "should return response payload if" do
+      it "a room_id, sender_id, and parts are provided" do
+        user_id = SecureRandom.uuid
+        create_res = @chatkit.create_user({ id: user_id, name: 'Ham' })
+        expect(create_res[:status]).to eq 201
+
+        room_res = @chatkit.create_room({ creator_id: user_id, name: 'my room' })
+        expect(room_res[:status]).to eq 201
+
+        send_message_res = @chatkit.send_multipart_message({
+          room_id: room_res[:body][:id],
+          sender_id: user_id,
+          parts: good_parts
         })
         expect(send_message_res[:status]).to eq 201
         expect(send_message_res[:body]).to have_key :message_id
