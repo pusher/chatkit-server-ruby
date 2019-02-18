@@ -4,6 +4,7 @@ require 'cgi'
 
 require_relative './error'
 require_relative './missing_parameter_error'
+require_relative './parameter_type_error'
 require_relative './response_error'
 
 module Chatkit
@@ -12,7 +13,10 @@ module Chatkit
   GLOBAL_SCOPE = "global"
 
   class Client
-    attr_accessor :api_instance, :authorizer_instance, :cursors_instance
+    attr_accessor :api_instance,
+                  :api_v2_instance,
+                  :authorizer_instance,
+                  :cursors_instance
 
     def initialize(options)
       base_options = {
@@ -27,10 +31,17 @@ module Chatkit
         })
       }
 
-      @api_instance = PusherPlatform::Instance.new(
+      @api_v2_instance = PusherPlatform::Instance.new(
         base_options.merge({
           service_name: 'chatkit',
           service_version: 'v2'
+        })
+      )
+
+      @api_instance = PusherPlatform::Instance.new(
+        base_options.merge({
+          service_name: 'chatkit',
+          service_version: 'v3'
         })
       )
 
@@ -338,11 +349,51 @@ module Chatkit
       query_params[:direction] = options[:direction] unless options[:direction].nil?
       query_params[:limit] = options[:limit] unless options[:limit].nil?
 
-      api_request({
+      api_v2_request({
         method: "GET",
         path: "/rooms/#{CGI::escape options[:room_id]}/messages",
         query: query_params,
         jwt: generate_su_token[:token]
+      })
+    end
+
+    def send_simple_message(options)
+      verify({text: {type: String, message: "You must provide some text for the message"}
+             }, options)
+
+      options[:parts] = [{type: "text/plain",
+                          content: options[:text]
+                        }]
+      options.delete(:text)
+
+      send_multipart_message(options)
+    end
+
+    def send_multipart_message(options)
+      verify({room_id: {type: String, message: "You must provide the ID of the room to send the message to"},
+              sender_id: {type: String, message: "You must provide the ID of the user sending the message"},
+              parts: {type: Array, message: "You must provide a parts array"}
+             }, options)
+
+      if not options[:parts].length > 0
+        raise Chatkit::MissingParameterError.new("parts array must have at least one item")
+      end
+
+      options[:parts].each { |part|
+        verify({type: {type: String, message: "Each part must define a type" },
+                content: {type: String, optional: true},
+                url: {type: String, optional: true}
+               }, part)
+        if (part[:content].nil? and part[:url].nil?)
+          raise Chatkit::MissingParameterError.new("Each part must have either :content or :url")
+        end
+      }
+
+      api_request({
+        method: "POST",
+        path: "/rooms/#{CGI::escape options[:room_id]}/messages",
+        body: {parts: options[:parts]},
+        jwt: generate_su_token({ user_id: options[:sender_id] })[:token]
       })
     end
 
@@ -380,7 +431,7 @@ module Chatkit
         attachment: options[:attachment]
       }
 
-      api_request({
+      api_v2_request({
         method: "POST",
         path: "/rooms/#{CGI::escape options[:room_id]}/messages",
         body: payload,
@@ -551,6 +602,10 @@ module Chatkit
 
     # Service-specific helpers
 
+    def api_v2_request(options)
+      make_request(@api_v2_instance, options)
+    end
+
     def api_request(options)
       make_request(@api_instance, options)
     end
@@ -712,6 +767,22 @@ module Chatkit
         body: body,
         jwt: generate_su_token[:token]
       })
+    end
+
+    def verify(rules, options)
+      rules.keys.each { |field_name|
+        rule = rules[field_name]
+        if options.has_key?(field_name)
+          if not (options[field_name].instance_of? rule[:type])
+            message = "Field " + field_name.to_s + " must have type " + rule[:type].to_s
+            raise Chatkit::ParameterTypeError.new(message)
+          end
+        else
+          if not rule.has_key? :optional
+            raise Chatkit::MissingParameterError.new(rule[:message])
+          end
+        end
+      }
     end
   end
 end
