@@ -218,7 +218,7 @@ module Chatkit
         name: options[:name],
         private: options[:private] || false
       }
-      
+
       body[:custom_data] = options[:custom_data] unless options[:custom_data].nil?
 
       unless options[:user_ids].nil?
@@ -339,6 +339,26 @@ module Chatkit
     end
 
     # Messages API
+
+    def fetch_multipart_messages(options)
+      verify({
+        room_id: "You must provide the ID of the room to send the message to",
+      }, options)
+
+      if !options[:limit].nil? and options[:limit] <= 0
+        raise Chatkit::MissingParameterError.new("Limit must be greater than 0")
+      end
+
+      optional_params = [:initial_id, :direction, :limit]
+      query_params = options.select { |key,_| optional_params.include? key }
+
+      api_request({
+        method: "GET",
+        path: "/rooms/#{CGI::escape options[:room_id]}/messages",
+        query: query_params,
+        jwt: generate_su_token[:token]
+      })
+    end
 
     def get_room_messages(options)
       if options[:room_id].nil?

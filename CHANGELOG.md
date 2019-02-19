@@ -8,7 +8,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### Added
 
-- `send_multipart_message` and `send_simple_message` using the new V3 endpoint for message sending
+- `send_multipart_message`, `send_simple_message` and `fetch_multipart_messages` using the new V3 endpoints
 
 ### Changed
 
