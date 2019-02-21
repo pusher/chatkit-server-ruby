@@ -934,10 +934,14 @@ describe Chatkit::Client do
     end
   end
 
-
   describe '#send_multipart_message' do
     good_parts = [{type: "text/plain", content: "hi"},
-                  {type: "image/png", url: "https://placekitten.com/200/300"}
+                  {type: "image/png", url: "https://placekitten.com/200/300"},
+                  {type: "binary/octet-stream",
+                   file: Random.new.bytes(100),
+                   name: "random bytes",
+                   customData: {some: "json", data: 42}
+                  }
                  ]
 
     describe "should raise a MissingParameterError if" do
@@ -977,16 +981,6 @@ describe Chatkit::Client do
              parts: [{ type: 'text/plain' }]
             })
         }.to raise_error Chatkit::MissingParameterError
-      end
-
-      it "wrong type is provided for a string parameter" do
-        expect {
-          @chatkit.send_multipart_message(
-            {sender_id: 'ham',
-             room_id: 123,
-             parts: good_parts
-            })
-        }.to raise_error Chatkit::ParameterTypeError
       end
     end
 

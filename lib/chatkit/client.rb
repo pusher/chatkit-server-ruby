@@ -1,11 +1,12 @@
 require 'pusher-platform'
 require 'json'
 require 'cgi'
+require 'excon'
 
 require_relative './error'
 require_relative './missing_parameter_error'
-require_relative './parameter_type_error'
 require_relative './response_error'
+require_relative './upload_error'
 
 module Chatkit
 
@@ -358,42 +359,61 @@ module Chatkit
     end
 
     def send_simple_message(options)
-      verify({text: {type: String, message: "You must provide some text for the message"}
+      verify({text: "You must provide some text for the message",
              }, options)
 
       options[:parts] = [{type: "text/plain",
                           content: options[:text]
-                        }]
-      options.delete(:text)
+                         }]
 
       send_multipart_message(options)
     end
 
     def send_multipart_message(options)
-      verify({room_id: {type: String, message: "You must provide the ID of the room to send the message to"},
-              sender_id: {type: String, message: "You must provide the ID of the user sending the message"},
-              parts: {type: Array, message: "You must provide a parts array"}
-             }, options)
+      verify({
+        room_id: "You must provide the ID of the room to send the message to",
+        sender_id: "You must provide the ID of the user sending the message",
+        parts: "You must provide a parts array",
+      }, options)
 
       if not options[:parts].length > 0
         raise Chatkit::MissingParameterError.new("parts array must have at least one item")
       end
 
-      options[:parts].each { |part|
-        verify({type: {type: String, message: "Each part must define a type" },
-                content: {type: String, optional: true},
-                url: {type: String, optional: true}
-               }, part)
-        if (part[:content].nil? and part[:url].nil?)
-          raise Chatkit::MissingParameterError.new("Each part must have either :content or :url")
+      # this assumes the token lives long enough to finish all S3 uploads
+      token = generate_su_token({ user_id: options[:sender_id] })[:token]
+
+      request_parts = options[:parts].map { |part|
+        verify({type: "Each part must define a type"}, part)
+
+        if !part[:content].nil?
+          {
+            type: part[:type],
+            content: part[:content]
+          }
+        elsif !part[:url].nil?
+          {
+            type: part[:type],
+            url: part[:url]
+          }
+        elsif !part[:file].nil?
+          attachment_id = upload_attachment(token, options[:room_id], part)
+          {
+            type: part[:type],
+            attachment: {id: attachment_id},
+            name: part[:name],
+            customData: part[:customData]
+          }.reject{ |_,v| v.nil? }
+        else
+          raise Chatkit::MissingParameterError.new("Each part must have one of :file, :content or :url")
         end
       }
 
       api_request({
         method: "POST",
         path: "/rooms/#{CGI::escape options[:room_id]}/messages",
-        body: {parts: options[:parts]},
-        jwt: generate_su_token({ user_id: options[:sender_id] })[:token]
+        body: {parts: request_parts},
+        jwt: token
       })
     end
 
@@ -769,18 +789,44 @@ module Chatkit
       })
     end
 
-    def verify(rules, options)
-      rules.keys.each { |field_name|
-        rule = rules[field_name]
-        if options.has_key?(field_name)
-          if not (options[field_name].instance_of? rule[:type])
-            message = "Field " + field_name.to_s + " must have type " + rule[:type].to_s
-            raise Chatkit::ParameterTypeError.new(message)
-          end
-        else
-          if not rule.has_key? :optional
-            raise Chatkit::MissingParameterError.new(rule[:message])
-          end
+    def upload_attachment(token, room_id, part)
+      body = part[:file]
+      content_length = body.length
+
+      if content_length <= 0
+        raise Chatkit::MissingParameterError.new("File contents size must be greater than 0")
+      end
+
+      attachment_req = {
+        content_type: part[:type],
+        content_length: content_length
+      }
+
+      attachment_response = api_request({
+        method: "POST",
+        path: "/rooms/#{CGI::escape room_id}/attachments",
+        body: attachment_req,
+        jwt: token
+      })
+
+      url = attachment_response[:body][:upload_url]
+      connection = Excon.new(url, :omit_default_port => true)
+      upload_response = connection.put(:body => body)
+
+      if upload_response.status != 200
+        error = {message: "Failed to upload attachment",
+                 response_object: upload_response
+                }
+        raise Chatkit::UploadError.new(error)
+      end
+
+      attachment_response[:body][:attachment_id]
+    end
+
+    def verify(required, options)
+      required.each { |field_name, message|
+        if options[field_name].nil?
+          raise Chatkit::MissingParameterError.new(message)
         end
       }
     end
