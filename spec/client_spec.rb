@@ -388,7 +388,7 @@ describe Chatkit::Client do
       end
 
       it "a creator_id, name and custom_data are provided" do
-      	user_id = SecureRandom.uuid
+        user_id = SecureRandom.uuid
         res = @chatkit.create_user({ id: user_id, name: 'Ham' })
         expect(res[:status]).to eq 201
 
@@ -1089,6 +1089,104 @@ describe Chatkit::Client do
     end
   end
 
+  describe '#fetch_multipart_messages' do
+    describe "should raise a MissingParameterError if" do
+      it "no room_id is provided" do
+        expect {
+          @chatkit.fetch_multipart_messages({})
+        }.to raise_error Chatkit::MissingParameterError
+      end
+    end
+
+    describe "should return response payload if" do
+      it "a room_id is provided" do
+        user_id = make_user()
+        room_id = make_room(user_id)
+
+        messages = make_messages(user_id, room_id,
+                                 ['hi 1', 'hi 2'])
+
+        get_messages_res = @chatkit.fetch_multipart_messages({ room_id: room_id })
+        expect(get_messages_res[:status]).to eq 200
+
+        get_messages_res[:body].each { |message|
+          expect(message[:room_id]).to eq room_id
+          expect(message[:user_id]).to eq user_id
+
+          message_id = message[:id]
+          content = message[:parts][0][:content]
+          expect(content).to eq messages[message_id]
+        }
+      end
+
+      it "a room_id, initial_id, direction, and limit are provided" do
+        user_id = make_user()
+        room_id = make_room(user_id)
+
+        messages = make_messages(user_id, room_id,
+                                 ['hi 1', 'hi 2', 'hi 3', 'hi 4'])
+
+        # the query should return only these messages
+        expected_messages = Hash[messages.to_a[2..3]]
+
+        get_messages_res_custom = @chatkit.fetch_multipart_messages({
+          room_id: room_id,
+          limit: 2,
+          direction: 'newer',
+          initial_id: messages.keys[1]
+        })
+
+        expect(get_messages_res_custom[:status]).to eq 200
+
+        get_messages_res_custom[:body].each { |message|
+          expect(message[:room_id]).to eq room_id
+          expect(message[:user_id]).to eq user_id
+
+          message_id = message[:id]
+          content = message[:parts][0][:content]
+          expect(content).to eq expected_messages[message_id]
+        }
+      end
+
+      it "an attachment is provided" do
+        user_id = make_user()
+        room_id = make_room(user_id)
+
+        payload = Random.new.bytes(100)
+
+        part =
+          {type: "binary/octet-stream",
+           file: payload,
+           name: "random bytes",
+           customData: {some: "json", data: 42}
+          }
+
+        @chatkit.send_multipart_message(
+          {sender_id: user_id,
+           room_id: room_id,
+           parts: [part]
+          })
+
+        get_messages_res = @chatkit.fetch_multipart_messages({
+          room_id: room_id
+        })
+
+        expect(get_messages_res[:status]).to eq 200
+
+        get_messages_res[:body].each { |message|
+          expect(message[:room_id]).to eq room_id
+          expect(message[:user_id]).to eq user_id
+
+          message_id = message[:id]
+          attachment_url = message[:parts][0][:attachment][:download_url]
+          response = Excon.new(attachment_url, :omit_default_port => true).get
+          expect(response[:status]).to eq 200
+          expect(response[:body]).to eq payload
+        }
+      end
+    end
+  end
+
   describe '#delete_message' do
     describe "should raise a MissingParameterError if" do
       it "no id is provided" do
@@ -1771,4 +1869,32 @@ describe Chatkit::Client do
       end
     end
   end
+end
+
+def make_user()
+  user_id = SecureRandom.uuid
+  create_res = @chatkit.create_user({ id: user_id, name: 'Ham' })
+  expect(create_res[:status]).to eq 201
+  user_id
+end
+
+def make_room(user_id)
+  room_res = @chatkit.create_room({ creator_id: user_id, name: 'my room' })
+  expect(room_res[:status]).to eq 201
+  room_res[:body][:id]
+end
+
+def make_messages(sender_id, room_id, messages)
+  result = {}
+  messages.each { |message|
+    send_message_res = @chatkit.send_simple_message(
+      {room_id: room_id,
+       sender_id: sender_id,
+       text: message
+      })
+    expect(send_message_res[:status]).to eq 201
+    message_id = send_message_res[:body][:message_id]
+    result[message_id] = message
+  }
+  result
 end
