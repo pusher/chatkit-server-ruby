@@ -812,13 +812,14 @@ module Chatkit
     def upload_attachment(token, room_id, part)
       body = part[:file]
       content_length = body.length
+      content_type = part[:type]
 
       if content_length <= 0
         raise Chatkit::MissingParameterError.new("File contents size must be greater than 0")
       end
 
       attachment_req = {
-        content_type: part[:type],
+        content_type: content_type,
         content_length: content_length
       }
 
@@ -831,7 +832,13 @@ module Chatkit
 
       url = attachment_response[:body][:upload_url]
       connection = Excon.new(url, :omit_default_port => true)
-      upload_response = connection.put(:body => body)
+      upload_response = connection.put(
+        :body => body,
+        :headers => {
+          "Content-Type" => content_type,
+          "Content-Length" => content_length
+        }
+      )
 
       if upload_response.status != 200
         error = {message: "Failed to upload attachment",
