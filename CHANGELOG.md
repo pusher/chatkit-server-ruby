@@ -6,7 +6,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased](https://github.com/pusher/chatkit-server-ruby/compare/1.3.0...HEAD)
 
-## [1.2.0](https://github.com/pusher/chatkit-server-ruby/compare/1.3.0...1.3.0)
+## [1.3.0](https://github.com/pusher/chatkit-server-ruby/compare/1.2.0...1.3.0)
 
 ### Added
 
