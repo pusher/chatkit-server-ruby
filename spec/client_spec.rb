@@ -183,7 +183,7 @@ describe Chatkit::Client do
     describe "should raise a MissingParameterError if" do
       it "no id is provided" do
         expect {
-          @chatkit.delete_user({})
+          @chatkit.async_delete_user({})
         }.to raise_error Chatkit::MissingParameterError
       end
     end
@@ -194,9 +194,14 @@ describe Chatkit::Client do
         create_res = @chatkit.create_user({ id: user_id, name: 'Ham' })
         expect(create_res[:status]).to eq 201
 
-        update_res = @chatkit.delete_user({ id: user_id })
-        expect(update_res[:status]).to eq 204
-        expect(update_res[:body]).to be_nil
+        update_res = @chatkit.async_delete_user({ id: user_id })
+        expect(update_res[:status]).to eq 202
+        job_id = update_res[:body][:id]
+
+        status_res = @chatkit.get_delete_status({ id: job_id })
+        expect(status_res[:status]).to eq 200
+        expect(status_res[:body][:status]).to_not be_empty
+        expect(status_res[:body][:status]).to_not eq "failed"
       end
     end
   end
@@ -452,7 +457,7 @@ describe Chatkit::Client do
     describe "should raise a MissingParameterError if" do
       it "no id is provided" do
         expect {
-          @chatkit.delete_room({})
+          @chatkit.async_delete_room({})
         }.to raise_error Chatkit::MissingParameterError
       end
     end
@@ -465,10 +470,16 @@ describe Chatkit::Client do
 
         room_res = @chatkit.create_room({ creator_id: user_id, name: 'my room' })
         expect(room_res[:status]).to eq 201
+        room_id = room_res[:id]
 
-        update_res = @chatkit.delete_room({ id: room_res[:body][:id] })
-        expect(update_res[:status]).to eq 204
-        expect(update_res[:body]).to be_nil
+        update_res = @chatkit.async_delete_room({ id: room_res[:body][:id] })
+        expect(update_res[:status]).to eq 202
+        job_id = update_res[:body][:id]
+
+        status_res = @chatkit.get_delete_status({ id: job_id })
+        expect(status_res[:status]).to eq 200
+        expect(status_res[:body][:status]).to_not be_empty
+        expect(status_res[:body][:status]).to_not eq "failed"
       end
     end
   end

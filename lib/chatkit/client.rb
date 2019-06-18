@@ -59,6 +59,13 @@ module Chatkit
           service_version: 'v2'
         })
       )
+
+      @scheduler_instance = PusherPlatform::Instance.new(
+        base_options.merge({
+          service_name: 'chatkit_scheduler',
+          service_version: 'v1'
+        })
+      )
     end
 
     def authenticate(options)
@@ -144,14 +151,26 @@ module Chatkit
       })
     end
 
-    def delete_user(options)
+    def async_delete_user(options)
       if options[:id].nil?
         raise Chatkit::MissingParameterError.new("You must provide the ID of the user you want to delete")
       end
 
-      api_request({
-        method: "DELETE",
+      scheduler_request({
+        method: "PUT",
         path: "/users/#{CGI::escape options[:id]}",
+        jwt: generate_su_token[:token]
+      })
+    end
+
+    def get_delete_status(options)
+      if options[:id].nil?
+        raise Chatkit::MissingParameterError.new("You must provide the ID of the job you want to query status of")
+      end
+
+      scheduler_request({
+        method: "GET",
+        path: "/status/#{CGI::escape options[:id]}",
         jwt: generate_su_token[:token]
       })
     end
@@ -251,13 +270,13 @@ module Chatkit
       })
     end
 
-    def delete_room(options)
+    def async_delete_room(options)
       if options[:id].nil?
         raise Chatkit::MissingParameterError.new("You must provide the ID of the room to delete")
       end
 
-      api_request({
-        method: "DELETE",
+      scheduler_request({
+        method: "PUT",
         path: "/rooms/#{CGI::escape options[:id]}",
         jwt: generate_su_token[:token]
       })
@@ -656,6 +675,10 @@ module Chatkit
 
     def cursors_request(options)
       make_request(@cursors_instance, options)
+    end
+
+    def scheduler_request(options)
+      make_request(@scheduler_instance, options)
     end
 
     private
