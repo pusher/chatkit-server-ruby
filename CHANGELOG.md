@@ -4,7 +4,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
-## [Unreleased](https://github.com/pusher/chatkit-server-ruby/compare/1.2.0...HEAD)
+## [Unreleased](https://github.com/pusher/chatkit-server-ruby/compare/1.3.0...HEAD)
+
+## [1.2.0](https://github.com/pusher/chatkit-server-ruby/compare/1.3.0...1.3.0)
+
+### Added
+
+- Async deletion methods. `async_delete_user`, `async_delete_room` and `get_delete_status`.
+  The `delete_room` and `delete_user` methods should be considered deprecated, and will be removed in a future version.
+
 
 ## [1.2.0](https://github.com/pusher/chatkit-server-ruby/compare/1.1.0...1.2.0)
 
