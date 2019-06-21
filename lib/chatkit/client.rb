@@ -42,7 +42,7 @@ module Chatkit
       @api_instance = PusherPlatform::Instance.new(
         base_options.merge({
           service_name: 'chatkit',
-          service_version: 'v3'
+          service_version: 'v4'
         })
       )
 

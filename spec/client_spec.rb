@@ -655,6 +655,44 @@ describe Chatkit::Client do
         expect(get_user_rooms_res[:body][0][:member_user_ids]).to eq [user_id]
       end
     end
+
+    describe "should contain unread counts" do
+      it "with and without messages in room" do
+        user_id = make_user()
+        room_id = make_room(user_id)
+
+        # cursor unset
+        # messages 0
+        # unread count 0
+        res = @chatkit.get_user_rooms({ id: user_id })
+        expect(res[:body][0][:unread_count]).to eq 0
+
+        # cursor unset
+        # messages 1
+        # unread count 1
+        messages = make_messages(user_id, room_id, ['hi'])
+        res = @chatkit.get_user_rooms({ id: user_id })
+        expect(res[:body][0][:unread_count]).to eq 1
+
+        # cursor set to message 1
+        # messages 1
+        # unread count 0
+        @chatkit.set_read_cursor({
+          room_id: room_id,
+          user_id: user_id,
+          position: messages.keys()[0]
+        })
+        res = @chatkit.get_user_rooms({ id: user_id })
+        expect(res[:body][0][:unread_count]).to eq 0
+
+        # cursor set to message 1
+        # messages 3
+        # unread count 1
+        make_messages(user_id, room_id, ['hi!', 'hello!'])
+        res = @chatkit.get_user_rooms({ id: user_id })
+        expect(res[:body][0][:unread_count]).to eq 2
+      end
+    end
   end
 
   describe '#get_user_joinable_rooms' do

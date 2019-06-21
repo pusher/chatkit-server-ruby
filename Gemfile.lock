@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    pusher-chatkit-server (1.2.0)
+    pusher-chatkit-server (1.3.0)
       pusher-platform (~> 0.11.2)
 
 GEM
@@ -9,7 +9,7 @@ GEM
   specs:
     diff-lcs (1.3)
     excon (0.62.0)
-    jwt (2.1.0)
+    jwt (2.2.1)
     pusher-platform (0.11.2)
       excon (~> 0.62.0)
       jwt (~> 2.1)
