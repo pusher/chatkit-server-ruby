@@ -407,6 +407,20 @@ describe Chatkit::Client do
         expect(room_res[:body][:name]).to eq 'my room'
         expect(room_res[:body][:custom_data][:foo]).to eq 'bar'
       end
+
+      it "a room id, creator_id and name are provided" do
+        user_id = SecureRandom.uuid
+        res = @chatkit.create_user({ id: user_id, name: 'Ham' })
+        expect(res[:status]).to eq 201
+
+        room_res = @chatkit.create_room({ id: "testroom", creator_id: user_id, name: 'my room' })
+        expect(room_res[:status]).to eq 201
+        expect(room_res[:body]).to have_key :id
+        expect(room_res[:body][:id]).to eq 'testroom'
+        expect(room_res[:body][:name]).to eq 'my room'
+        expect(room_res[:body][:private]).to be false
+        expect(room_res[:body][:member_user_ids]).to eq [user_id]
+      end
     end
   end
 
