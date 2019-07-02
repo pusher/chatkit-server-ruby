@@ -500,7 +500,7 @@ module Chatkit
     end
 
     def delete_message(options)
-      if options[:id].nil?
+      if options[:message_id].nil?
         raise Chatkit::MissingParameterError.new("You must provide the ID of the message you want to delete")
       end
 
@@ -510,7 +510,7 @@ module Chatkit
 
       api_request({
         method: "DELETE",
-        path: "/messages/rooms/#{options[:room_id]}/#{options[:id]}",
+        path: "/rooms/#{options[:room_id]}/messages/#{options[:message_id]}",
         jwt: generate_su_token[:token]
       })
     end
