@@ -407,6 +407,20 @@ describe Chatkit::Client do
         expect(room_res[:body][:name]).to eq 'my room'
         expect(room_res[:body][:custom_data][:foo]).to eq 'bar'
       end
+
+      it "a room id, creator_id and name are provided" do
+        user_id = SecureRandom.uuid
+        res = @chatkit.create_user({ id: user_id, name: 'Ham' })
+        expect(res[:status]).to eq 201
+
+        room_res = @chatkit.create_room({ id: "testroom", creator_id: user_id, name: 'my room' })
+        expect(room_res[:status]).to eq 201
+        expect(room_res[:body]).to have_key :id
+        expect(room_res[:body][:id]).to eq 'testroom'
+        expect(room_res[:body][:name]).to eq 'my room'
+        expect(room_res[:body][:private]).to be false
+        expect(room_res[:body][:member_user_ids]).to eq [user_id]
+      end
     end
   end
 
@@ -522,18 +536,12 @@ describe Chatkit::Client do
         room_res = @chatkit.create_room({ creator_id: user_id, name: 'my room' })
         expect(room_res[:status]).to eq 201
 
-        room_res_two = @chatkit.create_room({ creator_id: user_id, name: 'my room 2' })
-        expect(room_res_two[:status]).to eq 201
-
         get_rooms_res = @chatkit.get_rooms()
         expect(get_rooms_res[:status]).to eq 200
-        expect(get_rooms_res[:body].count).to eq 2
+        expect(get_rooms_res[:body].count).to eq 1
         expect(get_rooms_res[:body][0][:id]).to eq room_res[:body][:id]
         expect(get_rooms_res[:body][0][:name]).to eq 'my room'
         expect(get_rooms_res[:body][0][:private]).to be false
-        expect(get_rooms_res[:body][1][:id]).to eq room_res_two[:body][:id]
-        expect(get_rooms_res[:body][1][:name]).to eq 'my room 2'
-        expect(get_rooms_res[:body][1][:private]).to be false
       end
 
       it "include_private is specified" do
@@ -548,25 +556,16 @@ describe Chatkit::Client do
         })
         expect(room_res[:status]).to eq 201
 
-        room_res_two = @chatkit.create_room({ creator_id: user_id, name: 'my room 2' })
-        expect(room_res_two[:status]).to eq 201
-
         get_rooms_res = @chatkit.get_rooms()
         expect(get_rooms_res[:status]).to eq 200
-        expect(get_rooms_res[:body].count).to eq 1
-        expect(get_rooms_res[:body][0][:id]).to eq room_res_two[:body][:id]
-        expect(get_rooms_res[:body][0][:name]).to eq 'my room 2'
-        expect(get_rooms_res[:body][0][:private]).to be false
+        expect(get_rooms_res[:body].count).to eq 0
 
         get_rooms_with_private_res = @chatkit.get_rooms({ include_private: true })
         expect(get_rooms_with_private_res[:status]).to eq 200
-        expect(get_rooms_with_private_res[:body].count).to eq 2
+        expect(get_rooms_with_private_res[:body].count).to eq 1
         expect(get_rooms_with_private_res[:body][0][:id]).to eq room_res[:body][:id]
         expect(get_rooms_with_private_res[:body][0][:name]).to eq 'my room'
         expect(get_rooms_with_private_res[:body][0][:private]).to be true
-        expect(get_rooms_with_private_res[:body][1][:id]).to eq room_res_two[:body][:id]
-        expect(get_rooms_with_private_res[:body][1][:name]).to eq 'my room 2'
-        expect(get_rooms_with_private_res[:body][1][:private]).to be false
       end
 
       it "include_private and from_id are specified" do
@@ -584,6 +583,11 @@ describe Chatkit::Client do
         room_res_two = @chatkit.create_room({ creator_id: user_id, name: 'my room 2' })
         expect(room_res_two[:status]).to eq 201
 
+        if room_res[:body][:id] > room_res_two[:body][:id] then
+          # swap the room responses to match the order we expect them to be returned in
+          room_res_two, room_res = room_res, room_res_two
+        end
+
         get_rooms_res_one = @chatkit.get_rooms({
           include_private: true,
           from_id: room_res[:body][:id]
@@ -591,8 +595,8 @@ describe Chatkit::Client do
         expect(get_rooms_res_one[:status]).to eq 200
         expect(get_rooms_res_one[:body].count).to eq 1
         expect(get_rooms_res_one[:body][0][:id]).to eq room_res_two[:body][:id]
-        expect(get_rooms_res_one[:body][0][:name]).to eq 'my room 2'
-        expect(get_rooms_res_one[:body][0][:private]).to be false
+        expect(get_rooms_res_one[:body][0][:name]).to eq room_res_two[:body][:name]
+        expect(get_rooms_res_one[:body][0][:private]).to eq room_res_two[:body][:private]
 
         get_rooms_res_two = @chatkit.get_rooms({
           include_private: true,
@@ -1262,7 +1266,8 @@ describe Chatkit::Client do
         expect(send_message_res[:status]).to eq 201
 
         delete_messages_res = @chatkit.delete_message({
-          id: send_message_res[:body][:message_id]
+          message_id: send_message_res[:body][:message_id],
+          room_id: room_res[:body][:id]
         })
         expect(delete_messages_res[:status]).to eq 204
         expect(delete_messages_res[:body]).to be_nil

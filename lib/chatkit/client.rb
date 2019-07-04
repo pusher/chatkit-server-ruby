@@ -42,7 +42,7 @@ module Chatkit
       @api_instance = PusherPlatform::Instance.new(
         base_options.merge({
           service_name: 'chatkit',
-          service_version: 'v4'
+          service_version: 'v6'
         })
       )
 
@@ -238,6 +238,7 @@ module Chatkit
         private: options[:private] || false
       }
 
+      body[:id] = options[:id] unless options[:id].nil?
       body[:custom_data] = options[:custom_data] unless options[:custom_data].nil?
 
       unless options[:user_ids].nil?
@@ -499,13 +500,17 @@ module Chatkit
     end
 
     def delete_message(options)
-      if options[:id].nil?
+      if options[:message_id].nil?
         raise Chatkit::MissingParameterError.new("You must provide the ID of the message you want to delete")
+      end
+
+      if options[:room_id].nil?
+        raise Chatkit::MissingParameterError.new("You must provide the ID of the room to which the message belongs")
       end
 
       api_request({
         method: "DELETE",
-        path: "/messages/#{options[:id]}",
+        path: "/rooms/#{options[:room_id]}/messages/#{options[:message_id]}",
         jwt: generate_su_token[:token]
       })
     end
