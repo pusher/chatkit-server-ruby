@@ -262,7 +262,7 @@ module Chatkit
       payload = {}
       payload[:name] = options[:name] unless options[:name].nil?
       payload[:private] = options[:private] unless options[:private].nil?
-      body[:push_notification_title_override] = options[:push_notification_title_override] unless options[:push_notification_title_override].nil?
+      body[:push_notification_title_override] = options[:push_notification_title_override] if options.key?(:push_notification_title_override) # We want to accept nil
       payload[:custom_data] = options[:custom_data] unless options[:custom_data].nil?
 
       api_request({
