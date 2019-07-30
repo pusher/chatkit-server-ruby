@@ -421,6 +421,25 @@ describe Chatkit::Client do
         expect(room_res[:body][:private]).to be false
         expect(room_res[:body][:member_user_ids]).to eq [user_id]
       end
+
+      it "a creator_id, name and push_notification_title_override are provided" do
+        user_id = SecureRandom.uuid
+        pn_title_override = SecureRandom.uuid
+        res = @chatkit.create_user({ id: user_id, name: 'Ham' })
+        expect(res[:status]).to eq 201
+
+        room_res = @chatkit.create_room({
+          creator_id: user_id,
+          name: 'my room',
+          push_notification_title_override: pn_title_override
+        })
+        expect(room_res[:status]).to eq 201
+        expect(room_res[:body]).to have_key :id
+        expect(room_res[:body][:name]).to eq 'my room'
+        expect(room_res[:body][:private]).to be false
+        expect(room_res[:body][:member_user_ids]).to eq [user_id]
+        expect(room_res[:body][:push_notification_title_override]).to eq pn_title_override
+      end
     end
   end
 
@@ -435,6 +454,40 @@ describe Chatkit::Client do
 
     describe "should return response payload if" do
       it "a valid set of options are provided" do
+        user_id = SecureRandom.uuid
+        pn_title_override = SecureRandom.uuid
+        res = @chatkit.create_user({ id: user_id, name: 'Ham' })
+        expect(res[:status]).to eq 201
+
+        room_res = @chatkit.create_room({
+          creator_id: user_id,
+          name: 'my room',
+          private: true,
+          custom_data: { foo: 'bar', id: 1 }
+        })
+        expect(room_res[:status]).to eq 201
+
+        update_res = @chatkit.update_room({
+          id: room_res[:body][:id],
+          name: 'New room name',
+          private: false,
+          push_notification_title_override: pn_title_override,
+          custom_data: { foo: 'baz', id: 2 }
+        })
+        expect(update_res[:status]).to eq 204
+        expect(update_res[:body]).to be_nil
+
+        get_room_res = @chatkit.get_room({ id: room_res[:body][:id] })
+        expect(get_room_res[:status]).to eq 200
+        expect(get_room_res[:body][:id]).to eq room_res[:body][:id]
+        expect(get_room_res[:body][:name]).to eq 'New room name'
+        expect(get_room_res[:body][:private]).to eq false
+        expect(get_room_res[:body][:push_notification_title_override]).to eq pn_title_override
+        expect(get_room_res[:body][:custom_data][:foo]).to eq 'baz'
+        expect(get_room_res[:body][:custom_data][:id]).to eq 2
+      end
+
+      it "push_notification_title_override is set to nil" do
         user_id = SecureRandom.uuid
         res = @chatkit.create_user({ id: user_id, name: 'Ham' })
         expect(res[:status]).to eq 201
@@ -451,18 +504,31 @@ describe Chatkit::Client do
           id: room_res[:body][:id],
           name: 'New room name',
           private: false,
+          push_notification_title_override: 'something',
           custom_data: { foo: 'baz', id: 2 }
         })
         expect(update_res[:status]).to eq 204
         expect(update_res[:body]).to be_nil
 
         get_room_res = @chatkit.get_room({ id: room_res[:body][:id] })
+
         expect(get_room_res[:status]).to eq 200
-        expect(get_room_res[:body][:id]).to eq room_res[:body][:id]
-        expect(get_room_res[:body][:name]).to eq 'New room name'
-        expect(get_room_res[:body][:private]).to eq false
-        expect(get_room_res[:body][:custom_data][:foo]).to eq 'baz'
-        expect(get_room_res[:body][:custom_data][:id]).to eq 2
+        expect(get_room_res[:body][:push_notification_title_override]).to eq 'something'
+
+        update_res = @chatkit.update_room({
+          id: room_res[:body][:id],
+          name: 'New room name',
+          private: false,
+          push_notification_title_override: nil,
+          custom_data: { foo: 'baz', id: 2 }
+        })
+        expect(update_res[:status]).to eq 204
+        expect(update_res[:body]).to be_nil
+
+        get_room_res = @chatkit.get_room({ id: room_res[:body][:id] })
+
+        expect(get_room_res[:status]).to eq 200
+        expect(room_res[:body]).not_to have_key :push_notification_title_override
       end
     end
   end

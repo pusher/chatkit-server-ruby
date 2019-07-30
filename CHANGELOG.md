@@ -6,6 +6,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased](https://github.com/pusher/chatkit-server-ruby/compare/1.5.0...HEAD)
 
+### Additions
+
+- Support for setting push_notification_title_override in create_room
+  and update_room methods.
+
 [1.5.0](https://github.com/pusher/chatkit-server-ruby/compare/1.4.0...1.5.0) - 2019-07-03
 
 ### Additions
