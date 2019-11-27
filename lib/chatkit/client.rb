@@ -364,7 +364,7 @@ module Chatkit
 
     def fetch_multipart_messages(options)
       verify({
-        room_id: "You must provide the ID of the room to send the message to",
+        room_id: "You must provide the ID of the room to fetch the messages from",
       }, options)
 
       if !options[:limit].nil? and options[:limit] <= 0
