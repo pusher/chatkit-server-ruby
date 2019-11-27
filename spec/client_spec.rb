@@ -1208,6 +1208,87 @@ describe Chatkit::Client do
     end
   end
 
+  describe '#fetch_multipart_message' do
+    describe "should raise a MissingParameterError if" do
+      it "no room_id is provided" do
+        expect {
+          @chatkit.fetch_multipart_message({})
+        }.to raise_error Chatkit::MissingParameterError
+      end
+
+      it "no message_id is provided" do
+        expect {
+          @chatkit.fetch_multipart_message({})
+        }.to raise_error Chatkit::MissingParameterError
+      end
+    end
+
+    describe "should return response payload if" do
+      it "a room_id and message_id are provided" do
+        user_id = make_user()
+        room_id = make_room(user_id)
+        message = make_messages(user_id, room_id, ['hey there'])
+        message_id = message.keys[0]
+
+        get_message_res = @chatkit.fetch_multipart_message({ room_id: room_id, message_id: message_id })
+
+        expect(get_message_res[:status]).to eq 200
+        body = get_message_res[:body]
+        expect(body[:room_id]).to eq room_id
+        expect(body[:user_id]).to eq user_id
+        expect(body[:id]).to eq message_id
+      end
+    end
+
+    describe("should return a Not Found error if") do
+      it "the message doesn't exist" do
+        user_id = make_user()
+        room_id = make_room(user_id)
+
+        begin
+          @chatkit.fetch_multipart_message({ room_id: room_id, message_id: 99987777 })
+        rescue Chatkit::ResponseError => exception
+          status = JSON.parse(exception.to_json)['status']
+          expect(status).to eq 404
+        end
+      end
+
+      it "the room doesn't exist" do
+        user_id = make_user()
+        room_id = make_room(user_id)
+        message = make_messages(user_id, room_id, ['hey there'])
+        message_id = message.keys[0]
+
+        begin
+          @chatkit.fetch_multipart_message({ room_id: "fake-room-id", message_id: message_id })
+        rescue Chatkit::ResponseError => exception
+          status = JSON.parse(exception.to_json)['status']
+          expect(status).to eq 404
+        end
+      end
+
+      it "the message was deleted" do
+        user_id = make_user()
+        room_id = make_room(user_id)
+        message = make_messages(user_id, room_id, ['hey there'])
+        message_id = message.keys[0]
+
+        delete_message_res = @chatkit.delete_message({
+          message_id: message_id,
+          room_id: room_id
+        })
+        expect(delete_message_res[:status]).to eq 204
+
+        begin
+          @chatkit.fetch_multipart_message({ room_id: room_id, message_id: message_id })
+        rescue Chatkit::ResponseError => exception
+          status = JSON.parse(exception.to_json)['status']
+          expect(status).to eq 404
+        end
+      end
+    end
+  end
+
   describe '#fetch_multipart_messages' do
     describe "should raise a MissingParameterError if" do
       it "no room_id is provided" do

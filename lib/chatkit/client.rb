@@ -362,6 +362,22 @@ module Chatkit
 
     # Messages API
 
+    def fetch_multipart_message(options)
+      verify({
+        room_id: "You must provide the ID of the room to fetch the message from",
+        message_id: "You must provide the message ID"
+      }, options)
+
+      api_request({
+        method: "GET",
+        path: "/rooms/#{CGI::escape options[:room_id]}/messages/#{options[:message_id]}",
+        jwt: generate_su_token[:token]
+      })
+    end
+
+
+
+
     def fetch_multipart_messages(options)
       verify({
         room_id: "You must provide the ID of the room to send the message to",
