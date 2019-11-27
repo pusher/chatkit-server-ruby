@@ -32,3 +32,5 @@ Refer to the [docs site](https://docs.pusher.com/chatkit/reference/server-ruby).
 Be sure to run `bundle install` first. Note that if you're running against a production environment, some tests could be destructive.
 - Set a `CHATKIT_INSTANCE_LOCATOR` and `CHATKIT_INSTANCE_KEY` in your environment
 - Run tests with `rake test`
+
+Tip: to run individual tests, run `rspec spec/client_spec.rb -e "<name of your test>"
