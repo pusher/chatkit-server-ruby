@@ -1059,7 +1059,7 @@ describe Chatkit::Client do
                   {type: "binary/octet-stream",
                    file: Random.new.bytes(100),
                    name: "random bytes",
-                   customData: {some: "json", data: 42}
+                   custom_data: {some: "json", data: 42}
                   }
                  ]
 
@@ -1277,7 +1277,7 @@ describe Chatkit::Client do
           {type: "binary/octet-stream",
            file: payload,
            name: "random bytes",
-           customData: {some: "json", data: 42}
+           custom_data: {some: "json", data: 42}
           }
 
         @chatkit.send_multipart_message(
@@ -1299,7 +1299,7 @@ describe Chatkit::Client do
           expect(message[:parts][0]).to have_key :attachment
           expect(message[:parts][0][:attachment]).to have_key :download_url
           expect(message[:parts][0][:attachment]).to have_key :custom_data
-          expect(message[:parts][0][:attachment][:custom_data]).to eq part[:customData]
+          expect(message[:parts][0][:attachment][:custom_data]).to eq part[:custom_data]
           expect(message[:parts][0][:attachment]).to have_key :name
           expect(message[:parts][0][:attachment][:name]).to eq part[:name]
 
