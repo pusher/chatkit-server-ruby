@@ -850,7 +850,9 @@ module Chatkit
 
       attachment_req = {
         content_type: content_type,
-        content_length: content_length
+        content_length: content_length,
+        name: part[:name],
+        custom_data: part[:customData]
       }
 
       attachment_response = api_request({

@@ -1296,7 +1296,13 @@ describe Chatkit::Client do
           expect(message[:room_id]).to eq room_id
           expect(message[:user_id]).to eq user_id
 
-          message_id = message[:id]
+          expect(message[:parts][0]).to have_key :attachment
+          expect(message[:parts][0][:attachment]).to have_key :download_url
+          expect(message[:parts][0][:attachment]).to have_key :custom_data
+          expect(message[:parts][0][:attachment][:custom_data]).to eq part[:customData]
+          expect(message[:parts][0][:attachment]).to have_key :name
+          expect(message[:parts][0][:attachment][:name]).to eq part[:name]
+
           attachment_url = message[:parts][0][:attachment][:download_url]
           response = Excon.new(attachment_url, :omit_default_port => true).get
           expect(response[:status]).to eq 200
