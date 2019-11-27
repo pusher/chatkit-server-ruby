@@ -691,7 +691,7 @@ module Chatkit
     private
 
     def make_request(instance, options)
-      options.merge!({ headers: { "Content-Type": "application/json" } })
+      options.merge!({ headers: { "Content-Type" => "application/json" } })
       begin
         format_response(instance.request(options))
       rescue PusherPlatform::ErrorResponse => e
