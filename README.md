@@ -26,3 +26,9 @@ Refer to the `examples` directory. It contains several examples demonstrating al
 ## Documentation
 
 Refer to the [docs site](https://docs.pusher.com/chatkit/reference/server-ruby). It documents how to use all methods with examples.
+
+
+## Running tests
+Be sure to run `bundle install` first.
+- Set a `CHATKIT_INSTANCE_LOCATOR` and `CHATKIT_INSTANCE_KEY` in your environment
+- Run tests with `rake test`
