@@ -1277,6 +1277,7 @@ describe Chatkit::Client do
           {type: "binary/octet-stream",
            file: payload,
            name: "random bytes",
+           origin: "https://github.com/pusher/chatkit-server-ruby",
            custom_data: {some: "json", data: 42}
           }
 

@@ -850,6 +850,7 @@ module Chatkit
         content_type: content_type,
         content_length: content_length,
         name: part[:name],
+        origin: part[:origin],
         custom_data: part[:custom_data]
       }
 
