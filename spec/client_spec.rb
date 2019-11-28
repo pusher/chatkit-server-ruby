@@ -1211,14 +1211,24 @@ describe Chatkit::Client do
   describe '#fetch_multipart_message' do
     describe "should raise a MissingParameterError if" do
       it "no room_id is provided" do
+        user_id = make_user()
+        room_id = make_room(user_id)
+        message = make_messages(user_id, room_id, ['hey there'])
+        message_id = message.keys[0]
+
         expect {
-          @chatkit.fetch_multipart_message({})
+          @chatkit.fetch_multipart_message({message_id: message_id})
         }.to raise_error Chatkit::MissingParameterError
       end
 
       it "no message_id is provided" do
+        user_id = make_user()
+        room_id = make_room(user_id)
+        message = make_messages(user_id, room_id, ['hey there'])
+        message_id = message.keys[0]
+
         expect {
-          @chatkit.fetch_multipart_message({})
+          @chatkit.fetch_multipart_message({room_id: room_id})
         }.to raise_error Chatkit::MissingParameterError
       end
     end
@@ -1237,6 +1247,7 @@ describe Chatkit::Client do
         expect(body[:room_id]).to eq room_id
         expect(body[:user_id]).to eq user_id
         expect(body[:id]).to eq message_id
+        expect(body[:parts][0][:content]).to eq 'hey there'
       end
     end
 
@@ -1259,8 +1270,12 @@ describe Chatkit::Client do
         message = make_messages(user_id, room_id, ['hey there'])
         message_id = message.keys[0]
 
+        another_room_id = make_room(user_id)
+        anothermessage = make_messages(user_id, room_id, ['woah there'])
+        another_message_id = message.keys[0]
+
         begin
-          @chatkit.fetch_multipart_message({ room_id: "fake-room-id", message_id: message_id })
+          @chatkit.fetch_multipart_message({ room_id: another_room_id, message_id: message_id })
         rescue Chatkit::ResponseError => exception
           status = JSON.parse(exception.to_json)['status']
           expect(status).to eq 404
