@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ## [1.7.1](https://github.com/pusher/chatkit-server-ruby/compare/1.7.0...1.7.1)
 
 ### Fixes
-Includes updated Gemfile.lock
+- Includes updated Gemfile.lock
 
 ## [1.7.0](https://github.com/pusher/chatkit-server-ruby/compare/1.6.0...1.7.0) - 2019-11-28
 
