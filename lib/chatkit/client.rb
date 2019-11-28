@@ -442,9 +442,7 @@ module Chatkit
           attachment_id = upload_attachment(token, options[:room_id], part)
           {
             type: part[:type],
-            attachment: {id: attachment_id},
-            name: part[:name],
-            customData: part[:customData]
+            attachment: {id: attachment_id}
           }.reject{ |_,v| v.nil? }
         else
           raise Chatkit::MissingParameterError.new("Each part must have one of :file, :content or :url")
@@ -850,7 +848,10 @@ module Chatkit
 
       attachment_req = {
         content_type: content_type,
-        content_length: content_length
+        content_length: content_length,
+        name: part[:name],
+        origin: part[:origin],
+        custom_data: part[:custom_data]
       }
 
       attachment_response = api_request({
