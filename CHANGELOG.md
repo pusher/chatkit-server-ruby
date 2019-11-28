@@ -4,11 +4,19 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
-## [Unreleased](https://github.com/pusher/chatkit-server-ruby/compare/1.6.0...HEAD)
+## [Unreleased](https://github.com/pusher/chatkit-server-ruby/compare/1.7.0...HEAD)
+
+## [1.7.0](https://github.com/pusher/chatkit-server-ruby/compare/1.6.0...1.7.0) - 2019-11-28
+
+### Additions
+
+- Support for fetching a single message by its message ID via `fetch_multipart_message`
 
 ### Fixes
 
 - `send_multipart_message` now properly propagates the `name` and `custom_data` for any attachments provided
+
+- Fixes compatibility issue with Ruby 2.1.x
 
 ## [1.6.0](https://github.com/pusher/chatkit-server-ruby/compare/1.5.0...1.6.0) - 2019-07-30
 
