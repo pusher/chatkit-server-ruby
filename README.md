@@ -34,3 +34,9 @@ Be sure to run `bundle install` first. Note that if you're running against a pro
 - Run tests with `rake test`
 
 Tip: to run individual tests, run `rspec spec/client_spec.rb -e "<name of your test>"`
+
+## Release checklist
+- Update the CHANGELOG with the changes and new version number
+- Update the version number in `chatkit.gemspec`
+- Build with `gem build chatkit.gemspec`
+- Push to [Rubygems](https://rubygems.org/gems/pusher-chatkit-server) with `gem push pusher-chatkit-server-[version].gem`
