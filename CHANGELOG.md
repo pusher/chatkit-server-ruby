@@ -10,14 +10,14 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 - `send_multipart_message` now properly propagates the `name` and `custom_data` for any attachments provided
 
-[1.6.0](https://github.com/pusher/chatkit-server-ruby/compare/1.5.0...1.6.0) - 2019-07-30
+## [1.6.0](https://github.com/pusher/chatkit-server-ruby/compare/1.5.0...1.6.0) - 2019-07-30
 
 ### Additions
 
 - Support for setting `push_notification_title_override` in `create_room`
   and `update_room` methods.
 
-[1.5.0](https://github.com/pusher/chatkit-server-ruby/compare/1.4.0...1.5.0) - 2019-07-03
+## [1.5.0](https://github.com/pusher/chatkit-server-ruby/compare/1.4.0...1.5.0) - 2019-07-03
 
 ### Additions
 
@@ -29,7 +29,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - The `delete_message` method now *requires* a room ID parameter, `room_id`, and
   the `id` parameter has been renamed to `message_id` to avoid ambiguity.
 
-[1.4.0](https://github.com/pusher/chatkit-server-ruby/compare/1.3.0...1.4.0) - 2019-06-24
+## [1.4.0](https://github.com/pusher/chatkit-server-ruby/compare/1.3.0...1.4.0) - 2019-06-24
 
 ### Changed
 
