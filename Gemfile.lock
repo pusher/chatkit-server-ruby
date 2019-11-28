@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    pusher-chatkit-server (1.7.0)
+    pusher-chatkit-server (1.7.1)
       pusher-platform (~> 0.11.2)
 
 GEM
