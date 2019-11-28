@@ -36,7 +36,10 @@ Be sure to run `bundle install` first. Note that if you're running against a pro
 Tip: to run individual tests, run `rspec spec/client_spec.rb -e "<name of your test>"`
 
 ## Release checklist
+Best to do a proper PR, rather than releasing from master, as missing one of these steps could cause a broken release.
 - Update the CHANGELOG with the changes and new version number
 - Update the version number in `chatkit.gemspec`
-- Build with `gem build chatkit.gemspec`
+- Build with `bundle install`
+- Commit the `Gemfile.lock`
+- Merge upstream, do a Git tag and Git release
 - Push to [Rubygems](https://rubygems.org/gems/pusher-chatkit-server) with `gem push pusher-chatkit-server-[version].gem`
