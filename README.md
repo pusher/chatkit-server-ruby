@@ -42,4 +42,6 @@ Best to do a proper PR, rather than releasing from master, as missing one of the
 - Build with `bundle install`
 - Commit the `Gemfile.lock`
 - Merge upstream, do a Git tag and Git release
+- Pull from master and `bundle install`
+- Build gem with `gem build chatkit.gemspec`
 - Push to [Rubygems](https://rubygems.org/gems/pusher-chatkit-server) with `gem push pusher-chatkit-server-[version].gem`
