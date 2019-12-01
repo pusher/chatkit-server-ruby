@@ -1059,7 +1059,7 @@ describe Chatkit::Client do
                   {type: "binary/octet-stream",
                    file: Random.new.bytes(100),
                    name: "random bytes",
-                   customData: {some: "json", data: 42}
+                   custom_data: {some: "json", data: 42}
                   }
                  ]
 
@@ -1208,6 +1208,102 @@ describe Chatkit::Client do
     end
   end
 
+  describe '#fetch_multipart_message' do
+    describe "should raise a MissingParameterError if" do
+      it "no room_id is provided" do
+        user_id = make_user()
+        room_id = make_room(user_id)
+        message = make_messages(user_id, room_id, ['hey there'])
+        message_id = message.keys[0]
+
+        expect {
+          @chatkit.fetch_multipart_message({message_id: message_id})
+        }.to raise_error Chatkit::MissingParameterError
+      end
+
+      it "no message_id is provided" do
+        user_id = make_user()
+        room_id = make_room(user_id)
+        message = make_messages(user_id, room_id, ['hey there'])
+        message_id = message.keys[0]
+
+        expect {
+          @chatkit.fetch_multipart_message({room_id: room_id})
+        }.to raise_error Chatkit::MissingParameterError
+      end
+    end
+
+    describe "should return response payload if" do
+      it "a room_id and message_id are provided" do
+        user_id = make_user()
+        room_id = make_room(user_id)
+        message = make_messages(user_id, room_id, ['hey there'])
+        message_id = message.keys[0]
+
+        get_message_res = @chatkit.fetch_multipart_message({ room_id: room_id, message_id: message_id })
+
+        expect(get_message_res[:status]).to eq 200
+        body = get_message_res[:body]
+        expect(body[:room_id]).to eq room_id
+        expect(body[:user_id]).to eq user_id
+        expect(body[:id]).to eq message_id
+        expect(body[:parts][0][:content]).to eq 'hey there'
+      end
+    end
+
+    describe("should return a Not Found error if") do
+      it "the message doesn't exist" do
+        user_id = make_user()
+        room_id = make_room(user_id)
+
+        begin
+          @chatkit.fetch_multipart_message({ room_id: room_id, message_id: 99987777 })
+        rescue Chatkit::ResponseError => exception
+          status = JSON.parse(exception.to_json)['status']
+          expect(status).to eq 404
+        end
+      end
+
+      it "the room doesn't exist" do
+        user_id = make_user()
+        room_id = make_room(user_id)
+        message = make_messages(user_id, room_id, ['hey there'])
+        message_id = message.keys[0]
+
+        another_room_id = make_room(user_id)
+        anothermessage = make_messages(user_id, room_id, ['woah there'])
+        another_message_id = message.keys[0]
+
+        begin
+          @chatkit.fetch_multipart_message({ room_id: another_room_id, message_id: message_id })
+        rescue Chatkit::ResponseError => exception
+          status = JSON.parse(exception.to_json)['status']
+          expect(status).to eq 404
+        end
+      end
+
+      it "the message was deleted" do
+        user_id = make_user()
+        room_id = make_room(user_id)
+        message = make_messages(user_id, room_id, ['hey there'])
+        message_id = message.keys[0]
+
+        delete_message_res = @chatkit.delete_message({
+          message_id: message_id,
+          room_id: room_id
+        })
+        expect(delete_message_res[:status]).to eq 204
+
+        begin
+          @chatkit.fetch_multipart_message({ room_id: room_id, message_id: message_id })
+        rescue Chatkit::ResponseError => exception
+          status = JSON.parse(exception.to_json)['status']
+          expect(status).to eq 404
+        end
+      end
+    end
+  end
+
   describe '#fetch_multipart_messages' do
     describe "should raise a MissingParameterError if" do
       it "no room_id is provided" do
@@ -1277,7 +1373,8 @@ describe Chatkit::Client do
           {type: "binary/octet-stream",
            file: payload,
            name: "random bytes",
-           customData: {some: "json", data: 42}
+           origin: "https://github.com/pusher/chatkit-server-ruby",
+           custom_data: {some: "json", data: 42}
           }
 
         @chatkit.send_multipart_message(
@@ -1296,7 +1393,13 @@ describe Chatkit::Client do
           expect(message[:room_id]).to eq room_id
           expect(message[:user_id]).to eq user_id
 
-          message_id = message[:id]
+          expect(message[:parts][0]).to have_key :attachment
+          expect(message[:parts][0][:attachment]).to have_key :download_url
+          expect(message[:parts][0][:attachment]).to have_key :custom_data
+          expect(message[:parts][0][:attachment][:custom_data]).to eq part[:custom_data]
+          expect(message[:parts][0][:attachment]).to have_key :name
+          expect(message[:parts][0][:attachment][:name]).to eq part[:name]
+
           attachment_url = message[:parts][0][:attachment][:download_url]
           response = Excon.new(attachment_url, :omit_default_port => true).get
           expect(response[:status]).to eq 200

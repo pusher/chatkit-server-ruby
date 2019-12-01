@@ -362,9 +362,25 @@ module Chatkit
 
     # Messages API
 
+    def fetch_multipart_message(options)
+      verify({
+        room_id: "You must provide the ID of the room to fetch the message from",
+        message_id: "You must provide the message ID"
+      }, options)
+
+      api_request({
+        method: "GET",
+        path: "/rooms/#{CGI::escape options[:room_id]}/messages/#{options[:message_id]}",
+        jwt: generate_su_token[:token]
+      })
+    end
+
+
+
+
     def fetch_multipart_messages(options)
       verify({
-        room_id: "You must provide the ID of the room to send the message to",
+        room_id: "You must provide the ID of the room to fetch the messages from",
       }, options)
 
       if !options[:limit].nil? and options[:limit] <= 0
@@ -442,9 +458,7 @@ module Chatkit
           attachment_id = upload_attachment(token, options[:room_id], part)
           {
             type: part[:type],
-            attachment: {id: attachment_id},
-            name: part[:name],
-            customData: part[:customData]
+            attachment: {id: attachment_id}
           }.reject{ |_,v| v.nil? }
         else
           raise Chatkit::MissingParameterError.new("Each part must have one of :file, :content or :url")
@@ -797,7 +811,7 @@ module Chatkit
     private
 
     def make_request(instance, options)
-      options.merge!({ headers: { "Content-Type": "application/json" } })
+      options.merge!({ headers: { :'Content-Type' => 'application/json' } })
       begin
         format_response(instance.request(options))
       rescue PusherPlatform::ErrorResponse => e
@@ -956,7 +970,10 @@ module Chatkit
 
       attachment_req = {
         content_type: content_type,
-        content_length: content_length
+        content_length: content_length,
+        name: part[:name],
+        origin: part[:origin],
+        custom_data: part[:custom_data]
       }
 
       attachment_response = api_request({

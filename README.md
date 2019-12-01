@@ -26,3 +26,20 @@ Refer to the `examples` directory. It contains several examples demonstrating al
 ## Documentation
 
 Refer to the [docs site](https://docs.pusher.com/chatkit/reference/server-ruby). It documents how to use all methods with examples.
+
+
+## Running tests
+Be sure to run `bundle install` first. Note that if you're running against a production environment, some tests could be destructive.
+- Set a `CHATKIT_INSTANCE_LOCATOR` and `CHATKIT_INSTANCE_KEY` in your environment
+- Run tests with `rake test`
+
+Tip: to run individual tests, run `rspec spec/client_spec.rb -e "<name of your test>"`
+
+## Release checklist
+Best to do a proper PR, rather than releasing from master, as missing one of these steps could cause a broken release.
+- Update the CHANGELOG with the changes and new version number
+- Update the version number in `chatkit.gemspec`
+- Build with `bundle install`
+- Commit the `Gemfile.lock`
+- Merge upstream, do a Git tag and Git release
+- Push to [Rubygems](https://rubygems.org/gems/pusher-chatkit-server) with `gem push pusher-chatkit-server-[version].gem`
