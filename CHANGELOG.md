@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased](https://github.com/pusher/chatkit-server-ruby/compare/1.7.1...HEAD)]
 
+### Additions
+
+- Adds message editing via `edit{_simple,_multipart,}_message`.
+
 ## [1.7.1](https://github.com/pusher/chatkit-server-ruby/compare/1.7.0...1.7.1)
 
 ### Fixes
