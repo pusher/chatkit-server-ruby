@@ -575,8 +575,6 @@ module Chatkit
           {
             type: part[:type],
             attachment: {id: attachment_id},
-            name: part[:name],
-            customData: part[:customData]
           }.reject{ |_,v| v.nil? }
         else
           raise Chatkit::MissingParameterError.new("Each part must have one of :file, :content or :url")

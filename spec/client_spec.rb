@@ -1635,7 +1635,7 @@ describe Chatkit::Client do
                   {type: "binary/octet-stream",
                    file: Random.new.bytes(100),
                    name: "random bytes",
-                   customData: {some: "json", data: 42}
+                   custom_data: {some: "json", data: 42}
                   }
                  ]
     good_edit_parts = [{type: "text/plain", content: "hi"},
@@ -1643,7 +1643,7 @@ describe Chatkit::Client do
                        {type: "binary/octet-stream",
                         file: Random.new.bytes(100),
                         name: "random bytes",
-                        customData: {some: "json", data: 42}
+                        custom_data: {some: "json", data: 24}
                        }
                       ]
 
