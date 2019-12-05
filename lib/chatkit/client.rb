@@ -531,6 +531,110 @@ module Chatkit
       })
     end
 
+    def edit_simple_message(options)
+      verify({text: "You must provide some text for the message",
+             }, options)
+
+      options[:parts] = [{type: "text/plain",
+                          content: options[:text]
+                         }]
+
+      edit_multipart_message(options)
+    end
+
+    def edit_multipart_message(options)
+      verify({
+        room_id: "You must provide the ID of the room in which the message to edit belongs",
+        message_id: "You must provide the ID of the message to edit",
+        sender_id: "You must provide the ID of the user editing the message",
+        parts: "You must provide a parts array",
+      }, options)
+
+      if not options[:parts].length > 0
+        raise Chatkit::MissingParameterError.new("parts array must have at least one item")
+      end
+
+      # this assumes the token lives long enough to finish all S3 uploads
+      token = generate_su_token({ user_id: options[:sender_id] })[:token]
+
+      request_parts = options[:parts].map { |part|
+        verify({type: "Each part must define a type"}, part)
+
+        if !part[:content].nil?
+          {
+            type: part[:type],
+            content: part[:content]
+          }
+        elsif !part[:url].nil?
+          {
+            type: part[:type],
+            url: part[:url]
+          }
+        elsif !part[:file].nil?
+          attachment_id = upload_attachment(token, options[:room_id], part)
+          {
+            type: part[:type],
+            attachment: {id: attachment_id},
+          }.reject{ |_,v| v.nil? }
+        else
+          raise Chatkit::MissingParameterError.new("Each part must have one of :file, :content or :url")
+        end
+      }
+
+      api_request({
+        method: "PUT",
+        path: "/rooms/#{CGI::escape options[:room_id]}/messages/#{options[:message_id]}",
+        body: {parts: request_parts},
+        jwt: token
+      })
+    end
+
+    def edit_message(options)
+      if options[:room_id].nil?
+        raise Chatkit::MissingParameterError.new("You must provide the ID of the room in which the message to edit belongs")
+      end
+
+      if options[:message_id].nil?
+        raise Chatkit::MissingParameterError.new("You must provide the ID of the message to edit")
+      end
+
+      if options[:sender_id].nil?
+        raise Chatkit::MissingParameterError.new("You must provide the ID of the user editing the message")
+      end
+
+      if options[:text].nil?
+        raise Chatkit::MissingParameterError.new("You must provide some text for the message")
+      end
+
+      attachment = options[:attachment]
+
+      unless attachment.nil?
+        if attachment[:resource_link].nil?
+          raise Chatkit::MissingParameterError.new("You must provide a resource_link for the message attachment")
+        end
+
+        valid_file_types = ['image', 'video', 'audio', 'file']
+
+        if attachment[:type].nil? || !valid_file_types.include?(attachment[:type])
+          raise Chatkit::MissingParameterError.new(
+            "You must provide a valid type for the message attachment, i.e. one of: #{valid_file_types.join(', ')}"
+          )
+        end
+      end
+
+      payload = {
+        text: options[:text],
+        attachment: options[:attachment]
+      }
+
+      api_v2_request({
+        method: "PUT",
+        path: "/rooms/#{CGI::escape options[:room_id]}/messages/#{options[:message_id]}",
+        body: payload,
+        jwt: generate_su_token({ user_id: options[:sender_id] })[:token]
+      })
+    end
+
     # Roles and permissions API
 
     def create_global_role(options)
