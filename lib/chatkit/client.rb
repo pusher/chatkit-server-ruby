@@ -531,7 +531,7 @@ module Chatkit
       })
     end
 
-    def edit_simple_message(options)
+    def edit_simple_message(room_id, message_id, options)
       verify({text: "You must provide some text for the message",
              }, options)
 
@@ -539,16 +539,24 @@ module Chatkit
                           content: options[:text]
                          }]
 
-      edit_multipart_message(options)
+      edit_multipart_message(room_id, message_id, options)
     end
 
-    def edit_multipart_message(options)
+    def edit_multipart_message(room_id, message_id, options)
       verify({
-        room_id: "You must provide the ID of the room in which the message to edit belongs",
-        message_id: "You must provide the ID of the message to edit",
         sender_id: "You must provide the ID of the user editing the message",
         parts: "You must provide a parts array",
       }, options)
+      verify({
+        room_id: "You must provide the ID of the room in which the message to edit belongs",
+        message_id: "You must provide the ID of the message to edit",
+      }, {room_id: room_id, message_id: message_id})
+      if !options['room_id'].nil?
+        raise Chatkit::UnexpectedParameterError.new("a messages room id cannot be edited")
+      end
+      if !options['message_id'].nil?
+        raise Chatkit::UnexpectedParameterError.new("a messages id cannot be edited")
+      end
 
       if not options[:parts].length > 0
         raise Chatkit::MissingParameterError.new("parts array must have at least one item")
@@ -571,7 +579,7 @@ module Chatkit
             url: part[:url]
           }
         elsif !part[:file].nil?
-          attachment_id = upload_attachment(token, options[:room_id], part)
+          attachment_id = upload_attachment(token, room_id, part)
           {
             type: part[:type],
             attachment: {id: attachment_id},
@@ -583,18 +591,18 @@ module Chatkit
 
       api_request({
         method: "PUT",
-        path: "/rooms/#{CGI::escape options[:room_id]}/messages/#{options[:message_id]}",
+        path: "/rooms/#{CGI::escape room_id}/messages/#{message_id}",
         body: {parts: request_parts},
         jwt: token
       })
     end
 
-    def edit_message(options)
-      if options[:room_id].nil?
+    def edit_message(room_id, message_id, options)
+      if room_id.nil?
         raise Chatkit::MissingParameterError.new("You must provide the ID of the room in which the message to edit belongs")
       end
 
-      if options[:message_id].nil?
+      if message_id.nil?
         raise Chatkit::MissingParameterError.new("You must provide the ID of the message to edit")
       end
 
@@ -605,6 +613,14 @@ module Chatkit
       if options[:text].nil?
         raise Chatkit::MissingParameterError.new("You must provide some text for the message")
       end
+
+      if !options['room_id'].nil?
+        raise Chatkit::UnexpectedParameterError.new("a messages room id cannot be edited")
+      end
+      if !options['message_id'].nil?
+        raise Chatkit::UnexpectedParameterError.new("a messages id cannot be edited")
+      end
+
 
       attachment = options[:attachment]
 
@@ -629,7 +645,7 @@ module Chatkit
 
       api_v2_request({
         method: "PUT",
-        path: "/rooms/#{CGI::escape options[:room_id]}/messages/#{options[:message_id]}",
+        path: "/rooms/#{CGI::escape room_id}/messages/#{message_id}",
         body: payload,
         jwt: generate_su_token({ user_id: options[:sender_id] })[:token]
       })
