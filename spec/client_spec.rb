@@ -1448,34 +1448,32 @@ describe Chatkit::Client do
     describe "should raise a MissingParameterError if" do
       it "no room_id is provided" do
         expect {
-          @chatkit.edit_message({ text: 'hi', sender_id: 'ham', message_id: 42 })
+          @chatkit.edit_message(nil, 42, { text: 'hi', sender_id: 'ham' })
         }.to raise_error Chatkit::MissingParameterError
       end
 
       it "no message_id is provided" do
         expect {
-          @chatkit.edit_message({ text: 'hi', sender_id: 'ham', room_id: "123" })
+          @chatkit.edit_message("123", nil, { text: 'hi', sender_id: 'ham' })
         }.to raise_error Chatkit::MissingParameterError
       end
 
       it "no sender_id is provided" do
         expect {
-          @chatkit.edit_message({ text: 'hi', room_id: "123", message_id: 42 })
+          @chatkit.edit_message("123", 42, { text: 'hi' })
         }.to raise_error Chatkit::MissingParameterError
       end
 
       it "no text is provided" do
         expect {
-          @chatkit.edit_message({ sender_id: 'ham', room_id: "123", message_id: 42 })
+          @chatkit.edit_message("123", 42, { sender_id: 'ham' })
         }.to raise_error Chatkit::MissingParameterError
       end
 
       it "no resource_link is provided for a message with an attachment" do
         expect {
-          @chatkit.edit_message({
+          @chatkit.edit_message("123", 42, {
             sender_id: 'ham',
-            room_id: "123",
-            message_id: 42,
             text: 'test',
             attachment: {
               type: 'image'
@@ -1486,9 +1484,8 @@ describe Chatkit::Client do
 
       it "no type is provided for a message with an attachment" do
         expect {
-          @chatkit.edit_message({
+          @chatkit.edit_message("123", 42, {
             sender_id: 'ham',
-            room_id: "123",
             text: 'test',
             attachment: {
               resource_link: 'https://placekitten.com/200/300'
@@ -1499,10 +1496,8 @@ describe Chatkit::Client do
 
       it "an invalid type is provided for a message with an attachment" do
         expect {
-          @chatkit.edit_message({
+          @chatkit.edit_message("123", 42, {
             sender_id: 'ham',
-            room_id: "123",
-            message_id: 42,
             text: 'test',
             attachment: {
               resource_link: 'https://placekitten.com/200/300',
@@ -1530,9 +1525,7 @@ describe Chatkit::Client do
         expect(send_message_res[:status]).to eq 201
         expect(send_message_res[:body]).to have_key :message_id
 
-        edit_message_res = @chatkit.edit_message({
-          room_id: room_res[:body][:id],
-          message_id: send_message_res[:body][:message_id],
+        edit_message_res = @chatkit.edit_message(room_res[:body][:id], send_message_res[:body][:message_id], {
           sender_id: user_id,
           text: 'hi 1 edited'
         })
@@ -1559,9 +1552,7 @@ describe Chatkit::Client do
         expect(send_message_res[:status]).to eq 201
         expect(send_message_res[:body]).to have_key :message_id
 
-        edit_message_res = @chatkit.edit_message({
-          room_id: room_res[:body][:id],
-          message_id: send_message_res[:body][:message_id],
+        edit_message_res = @chatkit.edit_message(room_res[:body][:id], send_message_res[:body][:message_id],{
           sender_id: user_id,
           text: 'hi 1',
           attachment: {
@@ -1578,25 +1569,25 @@ describe Chatkit::Client do
     describe "should raise a MissingParameterError if" do
       it "no room_id is provided" do
         expect {
-          @chatkit.edit_simple_message({ text: 'hi', sender_id: 'ham', message_id: 42 })
+          @chatkit.edit_simple_message(nil, 42, { text: 'hi', sender_id: 'ham' })
         }.to raise_error Chatkit::MissingParameterError
       end
 
       it "no message_id is provided" do
         expect {
-          @chatkit.edit_simple_message({ text: 'hi', room_id: "123", sender_id: 'ham' })
+          @chatkit.edit_simple_message("123", nil, { text: 'hi', sender_id: 'ham' })
         }.to raise_error Chatkit::MissingParameterError
       end
 
       it "no sender_id is provided" do
         expect {
-          @chatkit.edit_simple_message({ text: 'hi', room_id: "123", message_id: 42 })
+          @chatkit.edit_simple_message("123", 42, { text: 'hi' })
         }.to raise_error Chatkit::MissingParameterError
       end
 
       it "no text is provided" do
         expect {
-          @chatkit.edit_simple_message({ sender_id: 'ham', room_id: "123", message_id: 42 })
+          @chatkit.edit_simple_message("123", 42, { sender_id: 'ham' })
         }.to raise_error Chatkit::MissingParameterError
       end
     end
@@ -1618,9 +1609,7 @@ describe Chatkit::Client do
         expect(send_message_res[:status]).to eq 201
         expect(send_message_res[:body]).to have_key :message_id
 
-        edit_message_res = @chatkit.edit_simple_message({
-          room_id: room_res[:body][:id],
-          message_id: send_message_res[:body][:message_id],
+        edit_message_res = @chatkit.edit_simple_message(room_res[:body][:id], send_message_res[:body][:message_id], {
           sender_id: user_id,
           text: 'hi 1 - edited'
         })
@@ -1651,34 +1640,32 @@ describe Chatkit::Client do
     describe "should raise a MissingParameterError if" do
       it "no room_id is provided" do
         expect {
-          @chatkit.edit_multipart_message({ sender_id: 'ham', message_id: 42, parts:  good_parts })
+          @chatkit.edit_multipart_message(nil, 42, { sender_id: 'ham', parts:  good_parts })
         }.to raise_error Chatkit::MissingParameterError
       end
 
       it "no message_id is provided" do
         expect {
-          @chatkit.edit_multipart_message({ sender_id: 'ham', room_id: "123", parts:  good_parts })
+          @chatkit.edit_multipart_message("123", nil, { sender_id: 'ham', parts:  good_parts })
         }.to raise_error Chatkit::MissingParameterError
       end
 
       it "no sender_id is provided" do
         expect {
-          @chatkit.edit_multipart_message({ room_id: "123", message_id: 42, parts: good_parts })
+          @chatkit.edit_multipart_message("123", 42, { room_id: "123", parts: good_parts })
         }.to raise_error Chatkit::MissingParameterError
       end
 
       it "no parts are provided" do
         expect {
-          @chatkit.edit_multipart_message({ sender_id: 'ham', room_id: "123", message_id: 42 })
+          @chatkit.edit_multipart_message("123", 42, { sender_id: 'ham' })
         }.to raise_error Chatkit::MissingParameterError
       end
 
       it "no type is provided for a part" do
         expect {
-          @chatkit.edit_multipart_message(
+          @chatkit.edit_multipart_message( "123", 42,
             {sender_id: 'ham',
-             room_id: "123",
-             message_id: 42,
              parts: [{ content: 'test' }]
             })
         }.to raise_error Chatkit::MissingParameterError
@@ -1686,10 +1673,8 @@ describe Chatkit::Client do
 
       it "only type is provided for a part" do
         expect {
-          @chatkit.edit_multipart_message(
+          @chatkit.edit_multipart_message("123", 42,
             {sender_id: 'ham',
-             room_id: "123",
-             message_id: 42,
              parts: [{ type: 'text/plain' }]
             })
         }.to raise_error Chatkit::MissingParameterError
@@ -1713,9 +1698,7 @@ describe Chatkit::Client do
         expect(send_message_res[:status]).to eq 201
         expect(send_message_res[:body]).to have_key :message_id
 
-        edit_message_res = @chatkit.edit_multipart_message({
-          room_id: room_res[:body][:id],
-          message_id: send_message_res[:body][:message_id],
+        edit_message_res = @chatkit.edit_multipart_message(room_res[:body][:id], send_message_res[:body][:message_id], {
           sender_id: user_id,
           parts: good_edit_parts
         })
