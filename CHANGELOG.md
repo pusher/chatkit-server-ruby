@@ -6,6 +6,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased](https://github.com/pusher/chatkit-server-ruby/compare/1.7.1...HEAD)]
 
+## [1.9.1](https://github.com/pusher/chatkit-server-ruby/compare/1.9.0...1.9.1)
+
 ### Fixes
 
 - Fix support for parameters which allow spaces.
