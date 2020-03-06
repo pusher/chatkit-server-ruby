@@ -6,6 +6,16 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased](https://github.com/pusher/chatkit-server-ruby/compare/1.7.1...HEAD)]
 
+## [1.9.1](https://github.com/pusher/chatkit-server-ruby/compare/1.9.0...1.9.1)
+
+### Fixes
+
+- Fix support for parameters which allow spaces.
+  Methods whose parameters contain spaces and were interpolated into URI path
+  segments were incorrectly encoded. For example, user ids containing spaces
+  when passed to get_user_rooms had spaces encoded as '+' (suitable for
+  query strings) not '%20'.
+
 ## [1.9.0](https://github.com/pusher/chatkit-server-ruby/compare/1.7.1...1.8.0)
 
 ### Additions

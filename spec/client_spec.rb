@@ -701,6 +701,23 @@ describe Chatkit::Client do
         expect(get_user_rooms_res[:body][0][:member_user_ids]).to eq [user_id]
       end
 
+      it "an id is provided which contains spaces" do
+        user_id = SecureRandom.uuid + " with spaces"
+        create_res = @chatkit.create_user({ id: user_id, name: 'Ham' })
+        expect(create_res[:status]).to eq 201
+
+        room_res = @chatkit.create_room({ creator_id: user_id, name: 'my room' })
+        expect(room_res[:status]).to eq 201
+
+        get_user_rooms_res = @chatkit.get_user_rooms({ id: user_id })
+        expect(get_user_rooms_res[:status]).to eq 200
+        expect(get_user_rooms_res[:body].count).to eq 1
+        expect(get_user_rooms_res[:body][0][:id]).to eq room_res[:body][:id]
+        expect(get_user_rooms_res[:body][0][:name]).to eq 'my room'
+        expect(get_user_rooms_res[:body][0][:private]).to be false
+        expect(get_user_rooms_res[:body][0][:member_user_ids]).to eq [user_id]
+      end
+
       it "an id is provided and only return the correct rooms" do
         user_id = SecureRandom.uuid
         user_id2 = SecureRandom.uuid
